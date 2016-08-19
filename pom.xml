@@ -17,7 +17,6 @@
     <artifactId>cy3robundle</artifactId>
     <version>0.0.1</version>
     <packaging>bundle</packaging>
-
     <name>cy3robundle</name>
     <description>A Cytoscape app for testing jena integration.</description>
     <url>https://github.com/matthiaskoenig/cy3robundle</url>
@@ -45,7 +44,6 @@
                 <enabled>false</enabled>
             </snapshots>
         </repository>
-
         <repository>
             <id>maven-central</id>
             <name>Maven central repository</name>
@@ -114,7 +112,6 @@
                 </executions>
             </plugin>
             -->
-
             <!-- Jar installation -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -125,7 +122,6 @@
     </build>
 
     <dependencies>
-
         <!-- Cytoscape 3 dependency -->
         <dependency>
             <groupId>org.cytoscape</groupId>
@@ -211,7 +207,6 @@
             <version>${cytoscape.api.version}</version>
             <scope>provided</scope>
         </dependency>
-
         <!-- OSGi core dependency -->
         <dependency>
             <groupId>org.osgi</groupId>
@@ -246,7 +241,13 @@
                 </exclusion>
                 <!--
                      Problems with newer OSGI and necessary to exclude and include by components
-                     without OSGI.
+                     without OSGI. The newer OSGI overwrites the old Cytoscape OSGI causing issues.
+                     jena-osgi is mainly an osgi packaging of
+                     - jena-core (depends on xerces)
+                     - jena-arq
+                     - jena-iri
+                     - jena-tdb
+                     So we exclude the jena-osgi and bring in the components.
                  -->
                 <exclusion>
                     <groupId>org.apache.jena</groupId>
@@ -258,23 +259,23 @@
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-core</artifactId>
             <version>3.1.0</version>
-            <!-- Here the xerces dependency comes in -->
             <exclusions>
                 <exclusion>
                     <groupId>xerces</groupId>
                     <artifactId>xercesImpl</artifactId>
                 </exclusion>
             </exclusions>
-            <!-- -->
         </dependency>
-        <!-- make it provided, so we can build -->
+        <!--
+            Exclusion & provided scope, so we can develop without OSGI.
+            Cytoscape includes the identical xerces version, so this should work.
+        -->
         <dependency>
             <groupId>xerces</groupId>
             <artifactId>xercesImpl</artifactId>
             <version>2.11.0</version>
             <scope>provided</scope>
         </dependency>
-        <!-- -->
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
@@ -290,7 +291,6 @@
             <artifactId>jena-tdb</artifactId>
             <version>3.1.0</version>
         </dependency>
-
 
         <!-- Logging -->
         <dependency>
@@ -368,6 +368,5 @@
             <version>${cytoscape.api.version}</version>
             <scope>test</scope>
         </dependency>
-
     </dependencies>
 </project>
