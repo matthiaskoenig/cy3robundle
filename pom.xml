@@ -89,7 +89,7 @@
                     </instructions>
                 </configuration>
             </plugin>
-            <!--
+
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-shade-plugin</artifactId>
@@ -111,7 +111,7 @@
                     </execution>
                 </executions>
             </plugin>
-            -->
+
             <!-- Jar installation -->
             <plugin>
                 <groupId>org.apache.maven.plugins</groupId>
@@ -215,17 +215,7 @@
             <scope>provided</scope>
         </dependency>
 
-
         <!-- ResearchObjects & OMEX -->
-        <!-- https://github.com/apache/incubator-taverna-language/tree/master/taverna-robundle -->
-        <!--
-        java.lang.ClassCastException: org.apache.xerces.jaxp.DocumentBuilderFactoryImpl cannot be cast to javax.xml.parsers.DocumentBuilderFactory
-        http://stackoverflow.com/questions/19992400/classcastexception-org-apache-xerces-jaxp-documentbuilderfactoryimpl-cannot-be
-        http://stackoverflow.com/questions/11677572/dealing-with-xerces-hell-in-java-maven
-        FIXME: Issues with xerces and the other xml libraries
-        FIXME: also multiple loggers again
-        -->
-
         <dependency>
             <groupId>org.apache.taverna.language</groupId>
             <artifactId>taverna-robundle</artifactId>
@@ -266,20 +256,16 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <!--
-            Exclusion & provided scope, so we can develop without OSGI.
-            Cytoscape includes the identical xerces version, so this should work.
-        -->
-        <dependency>
-            <groupId>xerces</groupId>
-            <artifactId>xercesImpl</artifactId>
-            <version>2.11.0</version>
-            <scope>provided</scope>
-        </dependency>
         <dependency>
             <groupId>org.apache.jena</groupId>
             <artifactId>jena-arq</artifactId>
             <version>3.1.0</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
         </dependency>
         <dependency>
             <groupId>org.apache.jena</groupId>
@@ -292,22 +278,51 @@
             <version>3.1.0</version>
         </dependency>
 
+        <dependency>
+            <groupId>xerces</groupId>
+            <artifactId>xercesImpl</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+        <!--
+        Update dependencies to fix:
+        https://issues.apache.org/jira/browse/JENA-1178
+        -->
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient</artifactId>
+            <version>4.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>org.apache.httpcomponents</groupId>
+            <artifactId>httpclient-cache</artifactId>
+            <version>4.5.2</version>
+        </dependency>
+        <dependency>
+            <groupId>com.github.jsonld-java</groupId>
+            <artifactId>jsonld-java</artifactId>
+            <version>0.8.3</version>
+        </dependency>
+
         <!-- Logging -->
+
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
             <version>1.1.7</version>
         </dependency>
+
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-core</artifactId>
             <version>1.1.7</version>
         </dependency>
+        <!--
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>slf4j-api</artifactId>
             <version>1.7.21</version>
         </dependency>
+        -->
 
         <!-- Testing -->
         <dependency>
