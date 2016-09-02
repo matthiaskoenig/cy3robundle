@@ -22,7 +22,7 @@ public class ResourceExtractor {
     private static Logger logger = LoggerFactory.getLogger(ResourceExtractor.class);
     private static File appDirectory;
 
-    // public static final String GUI_RESOURCES = "/gui/";
+    public static final String GUI_RESOURCES = "/gui/";
     public static final String RO_RESOURCES = "/ro/";
     public static final String OMEX_RESOURCES = "/omex/";
 

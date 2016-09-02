@@ -6,10 +6,29 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.Properties;
 
 
 import org.apache.xerces.util.XMLChar;
+import org.cy3sbml.actions.ArchiveAction;
 import org.cytoscape.application.CyApplicationConfiguration;
+import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.swing.CyAction;
+import org.cytoscape.application.swing.CySwingApplication;
+import org.cytoscape.io.util.StreamUtil;
+import org.cytoscape.model.CyNetworkFactory;
+import org.cytoscape.model.CyNetworkManager;
+import org.cytoscape.property.CyProperty;
+import org.cytoscape.task.read.LoadNetworkFileTaskFactory;
+import org.cytoscape.util.swing.FileUtil;
+import org.cytoscape.util.swing.OpenBrowser;
+import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
+import org.cytoscape.view.model.CyNetworkViewFactory;
+import org.cytoscape.view.model.CyNetworkViewManager;
+import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.work.SynchronousTaskManager;
+import org.cytoscape.work.TaskManager;
+import org.cytoscape.work.swing.DialogTaskManager;
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
@@ -66,6 +85,54 @@ public class CyActivator extends AbstractCyActivator {
             // Extract all resource files for JavaFX (no bundle access)
             final ResourceExtractor resourceHandler = new ResourceExtractor(bc, appDirectory);
             resourceHandler.extract();
+
+
+            // Create archive reader
+            ArchiveAction changeStateAction = new ArchiveAction();
+            registerService(bc, changeStateAction, CyAction.class, new Properties());
+
+
+
+            ///////////////////////////////////////////////
+            /* Get services */
+            CySwingApplication cySwingApplication = getService(bc, CySwingApplication.class);
+
+            CyApplicationManager cyApplicationManager = getService(bc, CyApplicationManager.class);
+            CyNetworkManager cyNetworkManager = getService(bc, CyNetworkManager.class);
+            CyNetworkViewManager cyNetworkViewManager = getService(bc, CyNetworkViewManager.class);
+            VisualMappingManager visualMappingManager = getService(bc, VisualMappingManager.class);
+            CyLayoutAlgorithmManager cyLayoutAlgorithmManager = getService(bc, CyLayoutAlgorithmManager.class);
+
+            DialogTaskManager dialogTaskManager = getService(bc, DialogTaskManager.class);
+            @SuppressWarnings("rawtypes")
+            SynchronousTaskManager synchronousTaskManager = getService(bc, SynchronousTaskManager.class);
+            @SuppressWarnings("rawtypes")
+            TaskManager taskManager = getService(bc, TaskManager.class);
+
+            CyNetworkFactory cyNetworkFactory = getService(bc, CyNetworkFactory.class);
+            CyNetworkViewFactory cyNetworkViewFactory = getService(bc, CyNetworkViewFactory.class);
+
+            @SuppressWarnings("unchecked")
+            CyProperty<Properties> cyProperties = getService(bc, CyProperty.class, "(cyPropertyName=cytoscape3.props)");
+            @SuppressWarnings("unchecked")
+            CyProperty<Properties> appProperties = getService(bc, CyProperty.class, "(cyPropertyName=cy3sbml.props)");
+
+            OpenBrowser openBrowser = getService(bc, OpenBrowser.class);
+            FileUtil fileUtil = getService(bc, FileUtil.class);
+            LoadNetworkFileTaskFactory loadNetworkFileTaskFactory = getService(bc, LoadNetworkFileTaskFactory.class);
+            ///////////////////////////////////////////////
+
+
+            // Archive file reader
+            StreamUtil streamUtil = getService(bc, StreamUtil.class);
+            ArchiveFileFilter archiveFilter = new ArchiveFileFilter(streamUtil);
+
+            ArchiveReaderTaskFactory archiveReaderTaskFactory = new ArchiveReaderTaskFactory(archiveFilter);
+            Properties archiveReaderProps = new Properties();
+            archiveReaderProps.setProperty("readerDescription", "Archive file reader (cy3robundle)");
+            archiveReaderProps.setProperty("readerId", "archiveNetworkReader");
+            registerAllServices(bc, archiveReaderTaskFactory, archiveReaderProps);
+
 
 			// research object
             XMLChar c;

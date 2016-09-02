@@ -22,8 +22,13 @@ import static org.junit.Assert.assertEquals;
 
 /**
  * Working with research bundles.
+ *
  * This is working outside of Cytoscape, but fails to work within the Cytoscape OSGI app.
  * http://stackoverflow.com/questions/11677572/dealing-with-xerces-hell-in-java-maven
+ *
+ * Uses the taverna robundle implementation to read the bundle.
+ *
+ *
  */
 public class ROBundle {
 
