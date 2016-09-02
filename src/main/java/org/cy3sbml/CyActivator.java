@@ -95,31 +95,13 @@ public class CyActivator extends AbstractCyActivator {
 
             ///////////////////////////////////////////////
             /* Get services */
-            CySwingApplication cySwingApplication = getService(bc, CySwingApplication.class);
 
-            CyApplicationManager cyApplicationManager = getService(bc, CyApplicationManager.class);
-            CyNetworkManager cyNetworkManager = getService(bc, CyNetworkManager.class);
-            CyNetworkViewManager cyNetworkViewManager = getService(bc, CyNetworkViewManager.class);
-            VisualMappingManager visualMappingManager = getService(bc, VisualMappingManager.class);
-            CyLayoutAlgorithmManager cyLayoutAlgorithmManager = getService(bc, CyLayoutAlgorithmManager.class);
-
-            DialogTaskManager dialogTaskManager = getService(bc, DialogTaskManager.class);
-            @SuppressWarnings("rawtypes")
-            SynchronousTaskManager synchronousTaskManager = getService(bc, SynchronousTaskManager.class);
-            @SuppressWarnings("rawtypes")
             TaskManager taskManager = getService(bc, TaskManager.class);
+            VisualMappingManager visualMappingManager = getService(bc, VisualMappingManager.class);
+            CyLayoutAlgorithmManager layoutAlgorithmManager = getService(bc, CyLayoutAlgorithmManager.class);
+            CyNetworkFactory networkFactory = getService(bc, CyNetworkFactory.class);
+            CyNetworkViewFactory networkViewFactory = getService(bc, CyNetworkViewFactory.class);
 
-            CyNetworkFactory cyNetworkFactory = getService(bc, CyNetworkFactory.class);
-            CyNetworkViewFactory cyNetworkViewFactory = getService(bc, CyNetworkViewFactory.class);
-
-            @SuppressWarnings("unchecked")
-            CyProperty<Properties> cyProperties = getService(bc, CyProperty.class, "(cyPropertyName=cytoscape3.props)");
-            @SuppressWarnings("unchecked")
-            CyProperty<Properties> appProperties = getService(bc, CyProperty.class, "(cyPropertyName=cy3sbml.props)");
-
-            OpenBrowser openBrowser = getService(bc, OpenBrowser.class);
-            FileUtil fileUtil = getService(bc, FileUtil.class);
-            LoadNetworkFileTaskFactory loadNetworkFileTaskFactory = getService(bc, LoadNetworkFileTaskFactory.class);
             ///////////////////////////////////////////////
 
 
@@ -127,7 +109,12 @@ public class CyActivator extends AbstractCyActivator {
             StreamUtil streamUtil = getService(bc, StreamUtil.class);
             ArchiveFileFilter archiveFilter = new ArchiveFileFilter(streamUtil);
 
-            ArchiveReaderTaskFactory archiveReaderTaskFactory = new ArchiveReaderTaskFactory(archiveFilter);
+            ArchiveReaderTaskFactory archiveReaderTaskFactory = new ArchiveReaderTaskFactory(
+                    archiveFilter,
+                    networkFactory,
+                    networkViewFactory,
+                    visualMappingManager,
+                    layoutAlgorithmManager);
             Properties archiveReaderProps = new Properties();
             archiveReaderProps.setProperty("readerDescription", "Archive file reader (cy3robundle)");
             archiveReaderProps.setProperty("readerId", "archiveNetworkReader");
@@ -135,6 +122,7 @@ public class CyActivator extends AbstractCyActivator {
 
 
 			// research object
+            /*
             XMLChar c;
 
             System.out.println("--------------------------------------");
@@ -147,6 +135,7 @@ public class CyActivator extends AbstractCyActivator {
             System.out.println("path: " + roPath);
             System.out.println("read bundle");
 			ROBundle.readBundle(roPath);
+            */
 
             System.out.println("--------------------------------------");
 			

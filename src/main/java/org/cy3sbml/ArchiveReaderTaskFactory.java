@@ -1,7 +1,11 @@
 package org.cy3sbml;
 
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.ZipInputStream;
 
 import org.cytoscape.io.CyFileFilter;
 import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
@@ -36,6 +40,7 @@ public class ArchiveReaderTaskFactory extends AbstractInputStreamTaskFactory {
                                     VisualMappingManager visualMappingManager,
                                     CyLayoutAlgorithmManager layoutAlgorithmManager) {
         super(filter);
+        logger.info("new ArchiveReaderTaskFactory");
         this.networkFactory = networkFactory;
         this.networkViewFactory = networkViewFactory;
         this.visualMappingManager = visualMappingManager;
@@ -51,20 +56,38 @@ public class ArchiveReaderTaskFactory extends AbstractInputStreamTaskFactory {
      */
     @Override
     public TaskIterator createTaskIterator(InputStream inputStream, String inputName) {
-        logger.debug("createTaskIterator: input stream name: " + inputName);
+        logger.info("createTaskIterator: input stream name: " + inputName);
 
+        ArchiveReaderTask task;
         try {
-            return new TaskIterator(
-                    new ArchiveReaderTask(inputStream, inputName,
-                            networkFactory,
-                            networkViewFactory,
-                            visualMappingManager,
-                            layoutAlgorithmManager)
-            );
-        } catch (IOException e) {
-            logger.error("Error in creating TaskIterator for ArchiveReaderTask.", e);
-            e.printStackTrace();
-            return null;
+            task = new ArchiveReaderTask(
+                    copyInputStream(inputStream),
+                    inputName,
+                    networkFactory,
+                    networkViewFactory,
+                    visualMappingManager,
+                    layoutAlgorithmManager);
+        } catch (IOException e){
+            task = null;
+            logger.error("Error copying stream", e);
         }
+        return new TaskIterator(task);
+    }
+
+    /**
+     * Copy InputStream.
+     *
+     * @param is
+     * @return
+     */
+    private static InputStream copyInputStream(InputStream is) throws IOException {
+        ByteArrayOutputStream copy = new ByteArrayOutputStream();
+        int chunk = 0;
+        byte[] data = new byte[1024*1024];
+        while((-1 != (chunk = is.read(data)))) {
+            copy.write(data, 0, chunk);
+        }
+        is.close();
+        return new ByteArrayInputStream( copy.toByteArray() );
     }
 }
