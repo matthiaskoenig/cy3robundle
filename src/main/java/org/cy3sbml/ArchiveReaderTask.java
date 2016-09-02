@@ -2,11 +2,13 @@ package org.cy3sbml;
 
 import java.io.InputStream;
 import java.nio.file.Path;
+import java.nio.file.attribute.FileTime;
 import java.util.*;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipError;
 import java.util.zip.ZipInputStream;
 
+import org.apache.taverna.robundle.manifest.Agent;
 import org.cy3sbml.util.AttributeUtil;
 import org.cytoscape.io.read.CyNetworkReader;
 import org.cytoscape.model.*;
@@ -51,6 +53,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 
 	private CyRootNetwork rootNetwork;
 	private CyNetwork network;       // global network of all SBML information
+    private HashMap<String, CyNode> id2node;
 
     private TaskMonitor taskMonitor;
 
@@ -69,6 +72,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 		this.viewFactory = viewFactory;
         this.visualMappingManager = visualMappingManager;
         this.layoutAlgorithmManager = layoutAlgorithmManager;
+
 	}
 
     /**
@@ -152,6 +156,8 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 				return;
 			}
 
+            id2node = new HashMap<>();
+
 
             /*
             The streamUtils transformed the InputStream to a ZipInputInstream
@@ -233,7 +239,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                     System.out.println(p);
                 }
 
-                // This are the files
+                // locations & aggregates (either files or uris)
                 System.out.println("<aggregates>");
                 List<PathMetadata> aggregates = manifest.getAggregates();
                 for (PathMetadata metaData: aggregates){
@@ -242,9 +248,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                     CyNode n = createNodeForPath(metaData);
                 }
 
-
-
-
+                // TODO: create intermediate nodes and edges
 
 
 
@@ -318,39 +322,86 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
     public static final String NODE_ATTR_FORMAT = "format";
     public static final String NODE_ATTR_MEDIATYPE = "mediatype";
 
+    public static final String NODE_ATTR_AUTHORED_BY = "authoredBy";
+    public static final String NODE_ATTR_AUTHORED_ON = "authoredOn";
+    public static final String NODE_ATTR_CREATED_BY = "createdBy";
+    public static final String NODE_ATTR_CREATED_ON = "createdOn";
 
 
-	private CyNode createNodeForPath(PathMetadata metadata){
+	private CyNode createNodeForPath(PathMetadata md){
 	    // Create single node
 	    CyNode n = network.addNode();
         // Set attributes
-        if (metadata.getUri() != null) {
+
+        String id = null;
+        if (md.getUri() != null) {
+            id = md.getUri().toString();
             AttributeUtil.set(network, n, NODE_ATTR_AGGREGATE_TYPE, AGGREGATE_TYPE_URI, String.class);
             AttributeUtil.set(network, n, NODE_ATTR_TYPE, TYPE_AGGREGATE, String.class);
-            AttributeUtil.set(network, n, NODE_ATTR_NAME, metadata.getUri().toString(), String.class);
+            AttributeUtil.set(network, n, NODE_ATTR_NAME, md.getUri().toString(), String.class);
 
         }
-        if (metadata.getFile() != null) {
+        if (md.getFile() != null) {
+            id = md.getUri().toString();
             AttributeUtil.set(network, n, NODE_ATTR_AGGREGATE_TYPE, AGGREGATE_TYPE_FILE, String.class);
             AttributeUtil.set(network, n, NODE_ATTR_TYPE, TYPE_AGGREGATE, String.class);
-            AttributeUtil.set(network, n, NODE_ATTR_NAME, metadata.getFile().toString(), String.class);
-        }
-        metadata.getAuthoredBy();
-        metadata.getAuthoredOn();
-        metadata.getCreatedBy();
-        metadata.getCreatedOn();
-
-
-        if (metadata.getConformsTo() != null){
-            AttributeUtil.set(network, n, NODE_ATTR_FORMAT, metadata.getConformsTo().toString(), String.class);
+            AttributeUtil.set(network, n, NODE_ATTR_NAME, md.getFile().toString(), String.class);
         }
 
-        if (metadata.getMediatype() != null) {
-            AttributeUtil.set(network, n, NODE_ATTR_MEDIATYPE, metadata.getMediatype(), String.class);
+        if (md.getConformsTo() != null){
+            AttributeUtil.set(network, n, NODE_ATTR_FORMAT, md.getConformsTo().toString(), String.class);
+        }
+
+        if (md.getMediatype() != null) {
+            AttributeUtil.set(network, n, NODE_ATTR_MEDIATYPE, md.getMediatype(), String.class);
+        }
+
+        if (md.getAuthoredBy() != null){
+            String text = getAgentsString(md.getAuthoredBy());
+            AttributeUtil.set(network, n, NODE_ATTR_AUTHORED_BY, text, String.class);
+        }
+        if (md.getAuthoredOn() != null){
+            FileTime time = md.getAuthoredOn();
+            AttributeUtil.set(network, n, NODE_ATTR_AUTHORED_ON, time.toString(), String.class);
+        }
+        if (md.getCreatedBy() != null){
+            String text = getAgentString(md.getCreatedBy());
+            AttributeUtil.set(network, n, NODE_ATTR_CREATED_BY, text, String.class);
+        }
+        if (md.getCreatedOn() != null){
+            FileTime time = md.getCreatedOn();
+            AttributeUtil.set(network, n, NODE_ATTR_CREATED_ON, time.toString(), String.class);
         }
 
         return n;
-
     }
+
+    /**
+     * Agents string representation.
+     *
+     * @param agents
+     * @return
+     */
+    private String getAgentsString(List<Agent> agents){
+        String text = "";
+        for (Agent a: agents){
+            text += getAgentString(a) + "; ";
+        }
+        return text;
+    }
+
+    /**
+     * Create String for agent.
+     *
+     * @param agent
+     * @return
+     */
+    private String getAgentString(Agent agent){
+        String text = String.format(
+                "%s (uri=%s, orcid=%s)",
+                agent.getName(), agent.getUri(), agent.getOrcid());
+        return text;
+    }
+
 
 }

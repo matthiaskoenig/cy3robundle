@@ -39,12 +39,15 @@ import org.slf4j.LoggerFactory;
 
 /**
  * Entry point to cy3robundle.
- *
- * Alternative libraries
- * https://github.com/stain/ro-combine-archive
- *
  * taverna-language
  *
+ * TODO: folder tree
+ * TODO: visual styles
+ * TODO: node images based on media type
+ * TODO: read secondary files
+ * TODO: archive icon
+ * TODO: read action based on archive icon
+ * TODO: information panel (with option to open the files, in browser)
  */
 public class CyActivator extends AbstractCyActivator {
     private static Logger logger = LoggerFactory.getLogger(CyActivator.class);
