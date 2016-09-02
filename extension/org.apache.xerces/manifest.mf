@@ -1,0 +1,7 @@
+Bundle-ManifestVersion: 2
+Bundle-SymbolicName: org.apache.xerces.extension
+Bundle-Version: 0.0.1
+Fragment-Host: system.bundle; extension:=framework
+Bundle-Name: xerces framework extension
+Bundle-Description: Bundle exports org.apache.xerces
+Export-Package: org.apache.xerces

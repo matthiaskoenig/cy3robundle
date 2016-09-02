@@ -1,16 +1,21 @@
 package org.cy3sbml;
 
 import java.io.File;
+import java.io.InputStream;
 import java.net.URI;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
 
 import org.apache.xerces.util.XMLChar;
 import org.cytoscape.application.CyApplicationConfiguration;
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 import org.cytoscape.service.util.AbstractCyActivator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 
 /**
@@ -20,6 +25,7 @@ import org.cytoscape.service.util.AbstractCyActivator;
  * used for startup of the app by Cytoscape 3.
  */
 public class CyActivator extends AbstractCyActivator {
+    private static Logger logger = LoggerFactory.getLogger(CyActivator.class);
 
 	public CyActivator() {
 		super();
@@ -28,12 +34,26 @@ public class CyActivator extends AbstractCyActivator {
 	/**
 	 * Starts the cy3sbml OSGI bundle.
 	 */
+	@Override
 	public void start(BundleContext bc) {
 		try {
 		    System.out.println("--------------------------------------");
             System.out.println("cy3robundle");
             System.out.println("--------------------------------------");
             BundleInformation bundleInfo = new BundleInformation(bc);
+
+            // Loading extension bundles from resources
+            String[] extensionBundles = {
+                "extension/org.apache.xerces.extension-0.0.1.jar"
+            };
+            logger.info("Install extension bundle");
+            Bundle bundle = bc.getBundle();
+            for (String extensionBundle: extensionBundles){
+                URL jarUrl = bundle.getEntry(extensionBundle);
+                InputStream input = jarUrl.openStream();
+                bc.installBundle(jarUrl.getPath(), input);
+                input.close();
+            }
 
             // Default configuration directory used for all cy3sbml files
             CyApplicationConfiguration configuration = getService(bc, CyApplicationConfiguration.class);
@@ -47,8 +67,6 @@ public class CyActivator extends AbstractCyActivator {
             final ResourceExtractor resourceHandler = new ResourceExtractor(bc, appDirectory);
             resourceHandler.extract();
 
-
-            // FIXME: xerces dependency nightmare
 			// research object
             XMLChar c;
 
@@ -70,5 +88,10 @@ public class CyActivator extends AbstractCyActivator {
 			e.printStackTrace();
 		}
 	}
+
+	@Override
+    public void shutDown(){
+
+    }
 }
 
