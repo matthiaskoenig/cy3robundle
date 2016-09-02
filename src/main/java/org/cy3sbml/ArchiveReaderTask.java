@@ -238,8 +238,17 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                 List<PathMetadata> aggregates = manifest.getAggregates();
                 for (PathMetadata metaData: aggregates){
                     System.out.println(metaData);
-                    createNodeForPath(metaData);
+                    // create the single node
+                    CyNode n = createNodeForPath(metaData);
                 }
+
+
+
+
+
+
+
+
                 System.out.println("<annotations>");
                 for (PathAnnotation a: manifest.getAnnotations()){
                     System.out.println(a);
@@ -306,12 +315,13 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
     public static final String NODE_ATTR_AGGREGATE_TYPE = "aggregate-type";
     public static final String NODE_ATTR_TYPE = "type";
     public static final String NODE_ATTR_NAME = "shared name";
+    public static final String NODE_ATTR_FORMAT = "format";
     public static final String NODE_ATTR_MEDIATYPE = "mediatype";
 
 
 
-	private void createNodeForPath(PathMetadata metadata){
-	    // Create node
+	private CyNode createNodeForPath(PathMetadata metadata){
+	    // Create single node
 	    CyNode n = network.addNode();
         // Set attributes
         if (metadata.getUri() != null) {
@@ -330,11 +340,16 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
         metadata.getCreatedBy();
         metadata.getCreatedOn();
 
-        metadata.getFolder()
+
+        if (metadata.getConformsTo() != null){
+            AttributeUtil.set(network, n, NODE_ATTR_FORMAT, metadata.getConformsTo().toString(), String.class);
+        }
 
         if (metadata.getMediatype() != null) {
             AttributeUtil.set(network, n, NODE_ATTR_MEDIATYPE, metadata.getMediatype(), String.class);
         }
+
+        return n;
 
     }
 
