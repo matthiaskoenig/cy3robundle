@@ -3,8 +3,11 @@ package org.cy3sbml;
 import java.io.InputStream;
 import java.nio.file.Path;
 import java.util.*;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipError;
 import java.util.zip.ZipInputStream;
 
+import org.cy3sbml.util.AttributeUtil;
 import org.cytoscape.io.read.CyNetworkReader;
 import org.cytoscape.model.*;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
@@ -160,13 +163,45 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
              */
 
             if (stream instanceof ZipInputStream){
-                ZipInputStream zipStream = (ZipInputStream) stream;
+                ZipInputStream zis = (ZipInputStream) stream;
 
+                /// RO ///
+                // read the RO manifest file
+                // one central file describing the content
+                //.ro/metadata.json
+
+                // many files describing the individual metadata
+                // metadata.rdf
+                // metadata.json
+
+
+                /// OMEX ///
+                // read OMEX manifest file
+                // only one central file describing
+                // manifest.xml (content)
+                // metadata.rdf (metadata about content)
+
+                // read all entries from zip file
+                ZipEntry ze = null;
+                while ((ze = zis.getNextEntry()) != null) {
+                    System.out.println("Unzipping " + ze.getName());
+
+                    // write files
+                    /*
+                    FileOutputStream fout = new FileOutputStream(ze.getName());
+                    for (int c = zin.read(); c != -1; c = zin.read()) {
+                        fout.write(c);
+                    }
+                    */
+                    zis.closeEntry();
+                    //fout.close();
+                }
+                zis.close();
+            } else {
+                logger.error("Stream is not ZipInputStream");
+                System.out.println(stream);
             }
 
-			// Read archive
-            Bundle bundle = Bundles.openBundle(stream);
-            System.out.println(bundle);
 
 			// Create empty root network and node map
 			network = networkFactory.createNetwork();
@@ -182,30 +217,64 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             // Read information from manifest file
             //////////////////////////////////////////////////////////////////
 
-            Manifest manifest = bundle.getManifest();
-            System.out.println(manifest);
+            // Read archive
+            try {
+                Bundle bundle = Bundles.openBundle(stream);
+                System.out.println(bundle);
 
-            System.out.println("CreatedBy: " + manifest.getCreatedBy());
-            System.out.println("CreatedOn: " + manifest.getCreatedOn());
+                Manifest manifest = bundle.getManifest();
+                System.out.println(manifest);
+                System.out.println("CreatedBy: " + manifest.getCreatedBy());
+                System.out.println("CreatedOn: " + manifest.getCreatedOn());
 
-            System.out.println("<manifest>");
-            List<Path> pathList = manifest.getManifest();
-            for (Path p: pathList){
-                System.out.println(p);
-            }
+                System.out.println("<manifest>");
+                List<Path> pathList = manifest.getManifest();
+                for (Path p: pathList){
+                    System.out.println(p);
+                }
 
-            System.out.println("<aggregates>");
-            List<PathMetadata> aggregates = manifest.getAggregates();
-            for (PathMetadata metaData: aggregates){
-                System.out.println(metaData);
+                // This are the files
+                System.out.println("<aggregates>");
+                List<PathMetadata> aggregates = manifest.getAggregates();
+                for (PathMetadata metaData: aggregates){
+                    System.out.println(metaData);
+                    createNodeForPath(metaData);
+                }
+                System.out.println("<annotations>");
+                for (PathAnnotation a: manifest.getAnnotations()){
+                    System.out.println(a);
+                }
+                if (taskMonitor != null){
+                    taskMonitor.setProgress(0.4);
+                }
+
+            }catch(ZipError e){
+                logger.error("Could not read the zip file.");
+                logger.error("Rename archives ending in *.zip with *.zip1");
+                /*
+                // The input stream could not be read as zip file.
+                // This is for instance the case if *.zip ending
+                // The resulting stream is than an
+                //      BufferedInputStream(ZipInputStream)
+                ZipInputStream zis = (ZipInputStream) stream;
+                // read all entries from zip file
+                ZipEntry ze = null;
+                while ((ze = zis.getNextEntry()) != null) {
+                    System.out.println("Unzipping " + ze.getName());
+
+                    // write files
+
+                    FileOutputStream fout = new FileOutputStream(ze.getName());
+                    for (int c = zin.read(); c != -1; c = zin.read()) {
+                        fout.write(c);
+                    }
+
+                    zis.closeEntry();
+                    //fout.close();
+                }
+                zis.close();
+                */
             }
-            System.out.println("<annotations>");
-            for (PathAnnotation a: manifest.getAnnotations()){
-                System.out.println(a);
-            }
-			if (taskMonitor != null){
-				taskMonitor.setProgress(0.4);
-			}
 
 			//////////////////////////////////////////////////////////////////
             // Base network
@@ -227,5 +296,46 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 			t.printStackTrace();
 		}
 	}
+
+	public static final String AGGREGATE_TYPE_URI = "uri";
+    public static final String AGGREGATE_TYPE_FILE = "file";
+    public static final String TYPE_AGGREGATE = "aggregate";
+    public static final String TYPE_FOLDER = "folder";
+
+
+    public static final String NODE_ATTR_AGGREGATE_TYPE = "aggregate-type";
+    public static final String NODE_ATTR_TYPE = "type";
+    public static final String NODE_ATTR_NAME = "shared name";
+    public static final String NODE_ATTR_MEDIATYPE = "mediatype";
+
+
+
+	private void createNodeForPath(PathMetadata metadata){
+	    // Create node
+	    CyNode n = network.addNode();
+        // Set attributes
+        if (metadata.getUri() != null) {
+            AttributeUtil.set(network, n, NODE_ATTR_AGGREGATE_TYPE, AGGREGATE_TYPE_URI, String.class);
+            AttributeUtil.set(network, n, NODE_ATTR_TYPE, TYPE_AGGREGATE, String.class);
+            AttributeUtil.set(network, n, NODE_ATTR_NAME, metadata.getUri().toString(), String.class);
+
+        }
+        if (metadata.getFile() != null) {
+            AttributeUtil.set(network, n, NODE_ATTR_AGGREGATE_TYPE, AGGREGATE_TYPE_FILE, String.class);
+            AttributeUtil.set(network, n, NODE_ATTR_TYPE, TYPE_AGGREGATE, String.class);
+            AttributeUtil.set(network, n, NODE_ATTR_NAME, metadata.getFile().toString(), String.class);
+        }
+        metadata.getAuthoredBy();
+        metadata.getAuthoredOn();
+        metadata.getCreatedBy();
+        metadata.getCreatedOn();
+
+        metadata.getFolder()
+
+        if (metadata.getMediatype() != null) {
+            AttributeUtil.set(network, n, NODE_ATTR_MEDIATYPE, metadata.getMediatype(), String.class);
+        }
+
+    }
 
 }

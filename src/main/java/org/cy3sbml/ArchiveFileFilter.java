@@ -1,6 +1,5 @@
 package org.cy3sbml;
 
-
 import org.cytoscape.io.BasicCyFileFilter;
 import org.cytoscape.io.DataCategory;
 import org.cytoscape.io.util.StreamUtil;
@@ -11,7 +10,6 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-
 
 /**
  * Archive Filter class.
@@ -26,7 +24,7 @@ public class ArchiveFileFilter extends BasicCyFileFilter {
      */
     public ArchiveFileFilter(StreamUtil streamUtil) {
         super(
-                new String[]{"zip", "omex", ""},
+                new String[]{"ro", "omex", "zip", ""},
                 new String[]{"application/zip", "application/octet-stream", "application/vnd.wf4ever.robundle+zipPK"},
                 "Archive network reader (cy3robundle)",
                 DataCategory.NETWORK,

@@ -4,8 +4,6 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.ZipInputStream;
 
 import org.cytoscape.io.CyFileFilter;
 import org.cytoscape.io.read.AbstractInputStreamTaskFactory;
@@ -57,17 +55,18 @@ public class ArchiveReaderTaskFactory extends AbstractInputStreamTaskFactory {
     @Override
     public TaskIterator createTaskIterator(InputStream inputStream, String inputName) {
         logger.info("createTaskIterator: input stream name: " + inputName);
+        // BufferedInput stream even for the zip files
 
         ArchiveReaderTask task;
         try {
             task = new ArchiveReaderTask(
-                    copyInputStream(inputStream),
+                    inputStream,
                     inputName,
                     networkFactory,
                     networkViewFactory,
                     visualMappingManager,
                     layoutAlgorithmManager);
-        } catch (IOException e){
+        } catch (Exception e){
             task = null;
             logger.error("Error copying stream", e);
         }

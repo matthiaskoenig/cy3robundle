@@ -38,10 +38,13 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Entry point to cy3sbml.
- * 
- * The CyActivator registers the cy3sbml services with OSGI. This is the class
- * used for startup of the app by Cytoscape 3.
+ * Entry point to cy3robundle.
+ *
+ * Alternative libraries
+ * https://github.com/stain/ro-combine-archive
+ *
+ * taverna-language
+ *
  */
 public class CyActivator extends AbstractCyActivator {
     private static Logger logger = LoggerFactory.getLogger(CyActivator.class);
