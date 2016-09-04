@@ -8,6 +8,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipError;
 import java.util.zip.ZipInputStream;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.taverna.robundle.manifest.Agent;
 import org.cy3sbml.util.AttributeUtil;
 import org.cytoscape.io.read.CyNetworkReader;
@@ -54,7 +55,8 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 
 	private CyRootNetwork rootNetwork;
 	private CyNetwork network;       // global network of all SBML information
-    private HashMap<String, CyNode> id2node;
+    private HashMap<String, CyNode> path2node;
+    private HashMap<CyNode, String> node2path;
 
     private TaskMonitor taskMonitor;
 
@@ -174,7 +176,8 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 			}
 
 			// mapping of archive content to CyNodes
-            id2node = new HashMap<>();
+            path2node = new HashMap<>();
+            node2path = new HashMap<>();
 
             if (stream instanceof ZipInputStream){
                 logger.info("ZipInputStream found in reader.");
@@ -246,8 +249,10 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                     CyNode n = createNodeForPath(metaData);
                 }
 
-                // TODO: create intermediate nodes and edges
-
+                // create tree nodes and edges
+                for (PathMetadata metaData: aggregates){
+                    createTreeForPath(metaData);
+                }
 
 
 
@@ -317,6 +322,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
     public static final String NODE_ATTR_AGGREGATE_TYPE = "aggregate-type";
     public static final String NODE_ATTR_TYPE = "type";
     public static final String NODE_ATTR_NAME = "shared name";
+    public static final String NODE_ATTR_PATH = "path";
     public static final String NODE_ATTR_FORMAT = "format";
     public static final String NODE_ATTR_MEDIATYPE = "mediatype";
 
@@ -325,25 +331,32 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
     public static final String NODE_ATTR_CREATED_BY = "createdBy";
     public static final String NODE_ATTR_CREATED_ON = "createdOn";
 
-
+    /**
+     * Creates the node for the given aggregate.
+     * @param md
+     * @return
+     */
 	private CyNode createNodeForPath(PathMetadata md){
 	    // Create single node
 	    CyNode n = network.addNode();
-        // Set attributes
+        String path = md.toString();
+        AttributeUtil.set(network, n, NODE_ATTR_PATH, path, String.class);
+        path2node.put(path, n);
+        node2path.put(n, path);
 
-        String id = null;
+        // Set attributes
+        String name;
         if (md.getUri() != null) {
-            id = md.getUri().toString();
+            name = md.getUri().toString();
+            AttributeUtil.set(network, n, NODE_ATTR_NAME, name, String.class);
             AttributeUtil.set(network, n, NODE_ATTR_AGGREGATE_TYPE, AGGREGATE_TYPE_URI, String.class);
             AttributeUtil.set(network, n, NODE_ATTR_TYPE, TYPE_AGGREGATE, String.class);
-            AttributeUtil.set(network, n, NODE_ATTR_NAME, md.getUri().toString(), String.class);
-
         }
         if (md.getFile() != null) {
-            id = md.getUri().toString();
+            name = md.getUri().toString();
+            AttributeUtil.set(network, n, NODE_ATTR_NAME, md.getFile().toString(), String.class);
             AttributeUtil.set(network, n, NODE_ATTR_AGGREGATE_TYPE, AGGREGATE_TYPE_FILE, String.class);
             AttributeUtil.set(network, n, NODE_ATTR_TYPE, TYPE_AGGREGATE, String.class);
-            AttributeUtil.set(network, n, NODE_ATTR_NAME, md.getFile().toString(), String.class);
         }
 
         if (md.getConformsTo() != null){
@@ -370,8 +383,71 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             FileTime time = md.getCreatedOn();
             AttributeUtil.set(network, n, NODE_ATTR_CREATED_ON, time.toString(), String.class);
         }
-
         return n;
+    }
+
+    /**
+     * Creates the Tree leading to root for given path.
+     * @param md
+     * @return
+     */
+    private void createTreeForPath(PathMetadata md) {
+
+        // Create single node
+        String path = md.toString();
+        CyNode n = path2node.get(path);
+        createParentForNode(n);
+
+    }
+
+
+    /**
+     * Creates gr node for the given aggregate.
+     *
+     * @param n
+     * @return
+     */
+    private void createParentForNode(CyNode n) {
+        logger.info("createParentForNode: " + n);
+
+        // get single node
+        String path = node2path.get(n);
+        String[] tokens = path.split("/");
+        Integer Nparts = tokens.length;
+        System.out.println("path:" + path);
+        System.out.println("tokens length:" + Nparts);
+        if (tokens.length>1){
+            String [] newTokens = Arrays.copyOfRange(tokens, 0, Nparts-1);
+            String parentPath;
+            if (newTokens.length == 1){
+                parentPath = newTokens[0] + "/";
+            } else {
+                parentPath = StringUtils.join(newTokens, "/");
+            }
+            System.out.println("parentPath:" + parentPath);
+
+            // create parent node and edge
+            CyNode nParent;
+            CyEdge e;
+            if (!path2node.containsKey(parentPath)){
+                // parent node does not exist (create node and edge)
+                nParent = network.addNode();
+                AttributeUtil.set(network, nParent, NODE_ATTR_PATH, parentPath, String.class);
+                node2path.put(nParent, parentPath);
+                path2node.put(parentPath, nParent);
+                network.addEdge(nParent, n, true);
+            } else {
+                // parent node exists
+                nParent = path2node.get(parentPath);
+                // check if edge exists
+                List<CyNode> neighbors = network.getNeighborList(n, CyEdge.Type.DIRECTED);
+                if (! neighbors.contains(nParent)){
+                    network.addEdge(nParent, n, true);
+                }
+            }
+            // recursively go up in the hierarchy
+            createParentForNode(nParent);
+        }
     }
 
     /**
