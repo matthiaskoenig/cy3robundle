@@ -287,6 +287,12 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                 logger.error("Rename archives ending in *.zip with *.zip1");
             }
 
+            // set image attributes
+            for (CyNode n: node2path.keySet()){
+                setImageAttribute(n);
+            }
+
+
 			//////////////////////////////////////////////////////////////////
             // Base network
             //////////////////////////////////////////////////////////////////
@@ -364,13 +370,59 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             AttributeUtil.set(network, n, NODE_ATTR_CREATED_ON, time.toString(), String.class);
         }
 
-        // image for node
+        // get the extension
+        // if format than from format
 
-        String imageLink = "https://raw.githubusercontent.com/matthiaskoenig/cy3robundle/master/src/main/resources/gui/images/mediatype/3dm-file-format.png";
-        AttributeUtil.set(network, n, NODE_IMAGE, imageLink, String.class);
-
+        // otherwise use the mediatype
         return n;
     }
+
+
+    /**
+     * TODO: add
+     *
+     * @param n
+     */
+    private void setImageAttribute(CyNode n){
+        final String TEMPLATE = "https://raw.githubusercontent.com/matthiaskoenig/cy3robundle/master/src/main/resources/gui/images/mediatype/%s.png";
+
+        // read attribute
+        String mediaType = AttributeUtil.get(network, n, NODE_ATTR_MEDIATYPE, String.class);
+        String format = AttributeUtil.get(network, n, NODE_ATTR_FORMAT, String.class);
+        String path = AttributeUtil.get(network, n, NODE_ATTR_PATH, String.class);
+
+        // image for node from mediaType
+        String extension;
+        if (mediaType == null) {
+            extension = "blank";
+        } else {
+            if (mediaType.equals("application/octet-stream")){
+                extension = "bin";
+            } else {
+                String tokens[] = mediaType.split("/");
+                extension = tokens[tokens.length-1];
+                // handle +xml
+                if (extension.contains("\\+")){
+                    tokens = extension.split("\\+");
+                    extension = tokens[0];
+                }
+            }
+        }
+        // in case of COMBINE archives we have additional information from format which we can use
+        if (format != null){
+            if (format.contains("sbml")){
+                extension = "sbml";
+            } else if (format.contains("sbgn")){
+                extension = "sbgn";
+            }
+            //TODO: omex, omex-manifest, x-markdown, illustrator, cellml
+        }
+
+
+        String imageLink = String.format(TEMPLATE, extension);
+        AttributeUtil.set(network, n, NODE_IMAGE, imageLink, String.class);
+    }
+
 
     /**
      * Creates the Tree leading to root for given path.
