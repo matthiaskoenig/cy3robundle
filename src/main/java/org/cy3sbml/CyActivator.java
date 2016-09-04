@@ -3,6 +3,8 @@ package org.cy3sbml;
 import java.io.File;
 import java.util.Properties;
 
+import org.cytoscape.session.events.SessionLoadedListener;
+import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
 import org.osgi.framework.BundleContext;
 
 import org.cytoscape.application.CyApplicationConfiguration;
@@ -65,6 +67,14 @@ public class CyActivator extends AbstractCyActivator {
             final ResourceExtractor resourceHandler = new ResourceExtractor(bc, appDirectory);
             resourceHandler.extract();
 
+            // load visual styles
+            VisualMappingManager visualMappingManager = getService(bc, VisualMappingManager.class);
+            LoadVizmapFileTaskFactory loadVizmapFileTaskFactory = getService(bc, LoadVizmapFileTaskFactory.class);
+            StyleManager styleManager = StyleManager.getInstance(loadVizmapFileTaskFactory, visualMappingManager);
+            styleManager.loadStyles();
+            registerService(bc, styleManager, SessionLoadedListener.class, new Properties());
+
+
             // Archive action
             CySwingApplication cySwingApplication = getService(bc, CySwingApplication.class);
             FileUtil fileUtil = getService(bc, FileUtil.class);
@@ -76,7 +86,6 @@ public class CyActivator extends AbstractCyActivator {
             registerService(bc, changeStateAction, CyAction.class, new Properties());
 
             // Archive file reader
-            VisualMappingManager visualMappingManager = getService(bc, VisualMappingManager.class);
             CyLayoutAlgorithmManager layoutAlgorithmManager = getService(bc, CyLayoutAlgorithmManager.class);
             CyNetworkFactory networkFactory = getService(bc, CyNetworkFactory.class);
             CyNetworkViewFactory networkViewFactory = getService(bc, CyNetworkViewFactory.class);

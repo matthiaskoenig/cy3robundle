@@ -20,6 +20,7 @@ import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkView;
 import org.cytoscape.view.model.CyNetworkViewFactory;
 import org.cytoscape.view.vizmap.VisualMappingManager;
+import org.cytoscape.view.vizmap.VisualStyle;
 import org.cytoscape.work.AbstractTask;
 import org.cytoscape.work.Task;
 import org.cytoscape.work.TaskIterator;
@@ -42,7 +43,29 @@ import org.slf4j.LoggerFactory;
  */
 public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 	private static final Logger logger = LoggerFactory.getLogger(ArchiveReaderTask.class);
+
     public static final String ARCHIVE_LAYOUT = "force-directed";
+    public static final String ARCHIVE_STYLE = "robundle";
+
+    public static final String AGGREGATE_TYPE_URI = "uri";
+    public static final String AGGREGATE_TYPE_FILE = "file";
+    public static final String TYPE_AGGREGATE = "aggregate";
+    public static final String TYPE_FOLDER = "folder";
+
+
+    public static final String NODE_ATTR_AGGREGATE_TYPE = "aggregate-type";
+    public static final String NODE_ATTR_TYPE = "type";
+    public static final String NODE_ATTR_NAME = "shared name";
+    public static final String NODE_ATTR_PATH = "path";
+    public static final String NODE_ATTR_FORMAT = "format";
+    public static final String NODE_ATTR_MEDIATYPE = "mediatype";
+    public static final String NODE_IMAGE = "image";
+
+    public static final String NODE_ATTR_AUTHORED_BY = "authoredBy";
+    public static final String NODE_ATTR_AUTHORED_ON = "authoredOn";
+    public static final String NODE_ATTR_CREATED_BY = "createdBy";
+    public static final String NODE_ATTR_CREATED_ON = "createdOn";
+
 
 	private String fileName;
 	private final InputStream stream;
@@ -98,22 +121,19 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
     public CyNetworkView buildCyNetworkView(final CyNetwork network) {
         logger.debug("buildCyNetworkView");
 
-        // Create view
+        // create view
         CyNetworkView view = viewFactory.createNetworkView(network);
 
-        // Set style
-        // VisualMappingManager only available in OSGI context
-        /*
+        // set style
         if (visualMappingManager != null) {
-            String styleName = "default";
-            VisualStyle style = SBMLStyleManager.getVisualStyleByName(visualMappingManager, styleName);
+            // VisualMappingManager only available in OSGI context
+            VisualStyle style = StyleManager.getVisualStyleByName(visualMappingManager, ARCHIVE_STYLE);
             if (style != null) {
                 visualMappingManager.setVisualStyle(style, view);
             }
         }
-        */
 
-        // layout
+        // apply layout
 		if (layoutAlgorithmManager != null) {
 			CyLayoutAlgorithm layout = layoutAlgorithmManager.getLayout(ARCHIVE_LAYOUT);
 			if (layout == null) {
@@ -129,7 +149,6 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 			}
 		}
 
-        // finished
         return view;
     }
 
@@ -290,23 +309,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 		}
 	}
 
-	public static final String AGGREGATE_TYPE_URI = "uri";
-    public static final String AGGREGATE_TYPE_FILE = "file";
-    public static final String TYPE_AGGREGATE = "aggregate";
-    public static final String TYPE_FOLDER = "folder";
 
-
-    public static final String NODE_ATTR_AGGREGATE_TYPE = "aggregate-type";
-    public static final String NODE_ATTR_TYPE = "type";
-    public static final String NODE_ATTR_NAME = "shared name";
-    public static final String NODE_ATTR_PATH = "path";
-    public static final String NODE_ATTR_FORMAT = "format";
-    public static final String NODE_ATTR_MEDIATYPE = "mediatype";
-
-    public static final String NODE_ATTR_AUTHORED_BY = "authoredBy";
-    public static final String NODE_ATTR_AUTHORED_ON = "authoredOn";
-    public static final String NODE_ATTR_CREATED_BY = "createdBy";
-    public static final String NODE_ATTR_CREATED_ON = "createdOn";
 
     /**
      * Creates the node for the given aggregate.
@@ -360,6 +363,12 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             FileTime time = md.getCreatedOn();
             AttributeUtil.set(network, n, NODE_ATTR_CREATED_ON, time.toString(), String.class);
         }
+
+        // image for node
+
+        String imageLink = "https://raw.githubusercontent.com/matthiaskoenig/cy3robundle/master/src/main/resources/gui/images/mediatype/3dm-file-format.png";
+        AttributeUtil.set(network, n, NODE_IMAGE, imageLink, String.class);
+
         return n;
     }
 

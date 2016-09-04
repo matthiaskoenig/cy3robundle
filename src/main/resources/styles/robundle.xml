@@ -72,7 +72,7 @@
             <visualProperty name="NODE_HEIGHT" default="40.0"/>
             <visualProperty name="NODE_LABEL_WIDTH" default="200.0"/>
             <visualProperty name="NODE_LABEL_POSITION" default="S,N,c,0.00,0.00"/>
-            <visualProperty name="NODE_CUSTOMGRAPHICS_1" default="org.cytoscape.ding.customgraphics.bitmap.URLImageCustomGraphics,25,/home/mkoenig/git/cy3robundle/src/main/resources/gui/images/mediatype/3dm-file-format.png,bitmap image">
+            <visualProperty name="NODE_CUSTOMGRAPHICS_1" default="org.cytoscape.ding.customgraphics.bitmap.URLImageCustomGraphics,25, https://raw.githubusercontent.com/matthiaskoenig/cy3robundle/master/src/main/resources/gui/images/mediatype/3dm-file-format.png ,bitmap image">
                 <discreteMapping attributeType="string" attributeName="mediatype">
                     <discreteMappingEntry value="org.cytoscape.ding.customgraphics.bitmap.URLImageCustomGraphics,119,/home/mkoenig/git/cy3robundle/src/main/resources/gui/images/mediatype/m4a-file-format-symbol.png,bitmap image" attributeValue="application/pdf"/>
                     <discreteMappingEntry value="org.cytoscape.ding.customgraphics.bitmap.URLImageCustomGraphics,28,/home/mkoenig/git/cy3robundle/src/main/resources/gui/images/mediatype/3gp-file-format-variant.png,bitmap image" attributeValue="application/octet-stream"/>
