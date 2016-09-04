@@ -32,8 +32,8 @@ import org.slf4j.LoggerFactory;
  *
  * TODO: visual styles & node images based on media type
  *
- * TODO: read secondary files (i.e. SBML & others)
  * TODO: information panel (with option to open secondary files in browser & RDF information)
+ * TODO: read secondary files (i.e. SBML & others)
  */
 public class CyActivator extends AbstractCyActivator {
     private static Logger logger = LoggerFactory.getLogger(CyActivator.class);

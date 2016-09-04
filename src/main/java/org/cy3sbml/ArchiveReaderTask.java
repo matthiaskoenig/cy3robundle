@@ -212,6 +212,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 
 			// Create empty root network and node map
 			network = networkFactory.createNetwork();
+            AttributeUtil.set(network, network, NODE_ATTR_PATH, fileName, String.class);
 
 			// To create a new CySubNetwork with the same CyNetwork's CyRootNetwork, cast your CyNetwork to
 			// CySubNetwork and call the CySubNetwork.getRootNetwork() method:
@@ -271,9 +272,11 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             // Base network
             //////////////////////////////////////////////////////////////////
 
-            // Set names
-            rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, String.format("%s", fileName));
-            network.getRow(network).set(CyNetwork.NAME, "Archive");
+            // Set name
+            String[] tokens = fileName.split("/");
+            String name = tokens[tokens.length-1];
+            rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, String.format("%s", name));
+            network.getRow(network).set(CyNetwork.NAME, String.format("%s Content", name));
 
 			if (taskMonitor != null){
 				taskMonitor.setProgress(0.8);
