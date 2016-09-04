@@ -42,12 +42,10 @@ import org.slf4j.LoggerFactory;
  * taverna-language
  *
  * TODO: folder tree
- * TODO: visual styles
- * TODO: node images based on media type
- * TODO: read secondary files
- * TODO: archive icon
- * TODO: read action based on archive icon
- * TODO: information panel (with option to open the files, in browser)
+ * TODO: visual styles & node images based on media type
+ * TODO: read secondary files (i.e. SBML & others)
+ * TODO: read action from archive icon
+ * TODO: information panel (with option to open secondary files in browser & RDF information)
  */
 public class CyActivator extends AbstractCyActivator {
     private static Logger logger = LoggerFactory.getLogger(CyActivator.class);
@@ -88,30 +86,26 @@ public class CyActivator extends AbstractCyActivator {
                 appDirectory.mkdir();
             }
 
-            // Extract all resource files for JavaFX (no bundle access)
+            // Extract resource files for JavaFX (no bundle access)
             final ResourceExtractor resourceHandler = new ResourceExtractor(bc, appDirectory);
             resourceHandler.extract();
 
+            // Archive action
+            CySwingApplication cySwingApplication = getService(bc, CySwingApplication.class);
+            FileUtil fileUtil = getService(bc, FileUtil.class);
+            SynchronousTaskManager synchronousTaskManager = getService(bc, SynchronousTaskManager.class);
+            LoadNetworkFileTaskFactory loadNetworkFileTaskFactory = getService(bc, LoadNetworkFileTaskFactory.class);
 
-            // Create archive reader
-            ArchiveAction changeStateAction = new ArchiveAction();
+            ArchiveAction changeStateAction = new ArchiveAction(cySwingApplication, fileUtil,
+                                                                loadNetworkFileTaskFactory, synchronousTaskManager);
             registerService(bc, changeStateAction, CyAction.class, new Properties());
 
-
-
-            ///////////////////////////////////////////////
-            /* Get services */
-
-            TaskManager taskManager = getService(bc, TaskManager.class);
+            // Archive file reader
             VisualMappingManager visualMappingManager = getService(bc, VisualMappingManager.class);
             CyLayoutAlgorithmManager layoutAlgorithmManager = getService(bc, CyLayoutAlgorithmManager.class);
             CyNetworkFactory networkFactory = getService(bc, CyNetworkFactory.class);
             CyNetworkViewFactory networkViewFactory = getService(bc, CyNetworkViewFactory.class);
 
-            ///////////////////////////////////////////////
-
-
-            // Archive file reader
             StreamUtil streamUtil = getService(bc, StreamUtil.class);
             ArchiveFileFilter archiveFilter = new ArchiveFileFilter(streamUtil);
 
@@ -125,23 +119,6 @@ public class CyActivator extends AbstractCyActivator {
             archiveReaderProps.setProperty("readerDescription", "Archive file reader (cy3robundle)");
             archiveReaderProps.setProperty("readerId", "archiveNetworkReader");
             registerAllServices(bc, archiveReaderTaskFactory, archiveReaderProps);
-
-
-			// research object
-            /*
-            XMLChar c;
-
-            System.out.println("--------------------------------------");
-			System.out.println("Research Object");
-			System.out.println("--------------------------------------");
-            URI fileURI = ResourceExtractor.fileURIforResource("/ro/investigation-96-2.ro.zip");
-            System.out.println("uri: " + fileURI);
-
-			Path roPath = Paths.get(fileURI);
-            System.out.println("path: " + roPath);
-            System.out.println("read bundle");
-			ROBundle.readBundle(roPath);
-            */
 
             System.out.println("--------------------------------------");
 			

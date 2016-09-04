@@ -36,7 +36,8 @@ import org.slf4j.LoggerFactory;
 /**
  * Create CyNetworks from Archives.
  *
- * This can be either COMBINE Archives or ResearchObjects.
+ * This can be either a COMBINE Archive or ResearchObject,
+ * or any other file type supported by taverna robundle.
  */
 public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 	private static final Logger logger = LoggerFactory.getLogger(ArchiveReaderTask.class);
