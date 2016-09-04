@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<vizmap documentVersion="3.0" id="VizMap-2016_09_04-17_47">
+<vizmap documentVersion="3.0" id="VizMap-2016_09_04-19_02">
     <visualStyle name="robundle">
         <network>
             <visualProperty name="NETWORK_CENTER_Y_LOCATION" default="0.0"/>
@@ -38,7 +38,7 @@
             <visualProperty name="NODE_CUSTOMGRAPHICS_POSITION_4" default="C,C,c,0.00,0.00"/>
             <visualProperty name="NODE_BORDER_TRANSPARENCY" default="255"/>
             <visualProperty name="NODE_LABEL" default="">
-                <passthroughMapping attributeType="string" attributeName="name"/>
+                <passthroughMapping attributeType="string" attributeName="shared name"/>
             </visualProperty>
             <visualProperty name="NODE_X_LOCATION" default="0.0"/>
             <visualProperty name="NODE_CUSTOMGRAPHICS_SIZE_4" default="0.0"/>
@@ -52,7 +52,7 @@
             <visualProperty name="NODE_CUSTOMGRAPHICS_SIZE_9" default="0.0"/>
             <visualProperty name="NODE_CUSTOMGRAPHICS_SIZE_1" default="0.0"/>
             <visualProperty name="NODE_WIDTH" default="60.0"/>
-            <visualProperty name="NODE_LABEL_COLOR" default="#666666"/>
+            <visualProperty name="NODE_LABEL_COLOR" default="#000000"/>
             <visualProperty name="NODE_CUSTOMGRAPHICS_SIZE_7" default="0.0"/>
             <visualProperty name="NODE_CUSTOMGRAPHICS_SIZE_6" default="0.0"/>
             <visualProperty name="NODE_DEPTH" default="0.0"/>
@@ -71,7 +71,7 @@
             <visualProperty name="NODE_CUSTOMGRAPHICS_POSITION_7" default="C,C,c,0.00,0.00"/>
             <visualProperty name="NODE_HEIGHT" default="40.0"/>
             <visualProperty name="NODE_LABEL_WIDTH" default="200.0"/>
-            <visualProperty name="NODE_LABEL_POSITION" default="SE,NW,c,-2.00,3.00"/>
+            <visualProperty name="NODE_LABEL_POSITION" default="S,N,c,0.00,0.00"/>
             <visualProperty name="NODE_CUSTOMGRAPHICS_1" default="org.cytoscape.ding.customgraphics.bitmap.URLImageCustomGraphics,25,/home/mkoenig/git/cy3robundle/src/main/resources/gui/images/mediatype/3dm-file-format.png,bitmap image">
                 <discreteMapping attributeType="string" attributeName="mediatype">
                     <discreteMappingEntry value="org.cytoscape.ding.customgraphics.bitmap.URLImageCustomGraphics,119,/home/mkoenig/git/cy3robundle/src/main/resources/gui/images/mediatype/m4a-file-format-symbol.png,bitmap image" attributeValue="application/pdf"/>
@@ -92,7 +92,7 @@
             <visualProperty name="EDGE_STROKE_SELECTED_PAINT" default="#FF0000"/>
             <visualProperty name="EDGE_UNSELECTED_PAINT" default="#FFFFFF"/>
             <visualProperty name="EDGE_TRANSPARENCY" default="255"/>
-            <visualProperty name="EDGE_BEND" default="0.728545744495502,-0.684997151948455,0.6456513365424503"/>
+            <visualProperty name="EDGE_BEND"/>
             <visualProperty name="EDGE_SELECTED" default="false"/>
             <visualProperty name="EDGE_LABEL_FONT_FACE" default="SansSerif.plain,plain,10"/>
             <visualProperty name="EDGE_TARGET_ARROW_SHAPE" default="DELTA"/>

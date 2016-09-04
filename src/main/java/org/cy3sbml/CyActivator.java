@@ -31,6 +31,7 @@ import org.slf4j.LoggerFactory;
  * Zip files, COMBINE archive files, ResearchObjects.
  *
  * TODO: visual styles & node images based on media type
+ *
  * TODO: read secondary files (i.e. SBML & others)
  * TODO: information panel (with option to open secondary files in browser & RDF information)
  */

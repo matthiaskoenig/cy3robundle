@@ -245,16 +245,14 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                 List<PathMetadata> aggregates = manifest.getAggregates();
                 for (PathMetadata metaData: aggregates){
                     System.out.println(metaData);
-                    // create the single node
+                    // create aggregate node
                     CyNode n = createNodeForPath(metaData);
                 }
 
-                // create tree nodes and edges
+                // create archive tree
                 for (PathMetadata metaData: aggregates){
                     createTreeForPath(metaData);
                 }
-
-
 
                 System.out.println("<annotations>");
                 for (PathAnnotation a: manifest.getAnnotations()){
@@ -267,39 +265,15 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             }catch(ZipError e){
                 logger.error("Could not read the zip file.");
                 logger.error("Rename archives ending in *.zip with *.zip1");
-                /*
-                // The input stream could not be read as zip file.
-                // This is for instance the case if *.zip ending
-                // The resulting stream is than an
-                //      BufferedInputStream(ZipInputStream)
-                ZipInputStream zis = (ZipInputStream) stream;
-                // read all entries from zip file
-                ZipEntry ze = null;
-                while ((ze = zis.getNextEntry()) != null) {
-                    System.out.println("Unzipping " + ze.getName());
-
-                    // write files
-
-                    FileOutputStream fout = new FileOutputStream(ze.getName());
-                    for (int c = zin.read(); c != -1; c = zin.read()) {
-                        fout.write(c);
-                    }
-
-                    zis.closeEntry();
-                    //fout.close();
-                }
-                zis.close();
-                */
             }
 
 			//////////////////////////////////////////////////////////////////
             // Base network
             //////////////////////////////////////////////////////////////////
 
-            // Set naming
-            String name = "Archive";
-            rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, String.format("%s", name));
-            network.getRow(network).set(CyNetwork.NAME, String.format("All: %s", name));
+            // Set names
+            rootNetwork.getRow(rootNetwork).set(CyNetwork.NAME, String.format("%s", fileName));
+            network.getRow(network).set(CyNetwork.NAME, "Archive");
 
 			if (taskMonitor != null){
 				taskMonitor.setProgress(0.8);
@@ -354,7 +328,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
         }
         if (md.getFile() != null) {
             name = md.getUri().toString();
-            AttributeUtil.set(network, n, NODE_ATTR_NAME, md.getFile().toString(), String.class);
+            AttributeUtil.set(network, n, NODE_ATTR_NAME, name, String.class);
             AttributeUtil.set(network, n, NODE_ATTR_AGGREGATE_TYPE, AGGREGATE_TYPE_FILE, String.class);
             AttributeUtil.set(network, n, NODE_ATTR_TYPE, TYPE_AGGREGATE, String.class);
         }
@@ -392,12 +366,10 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
      * @return
      */
     private void createTreeForPath(PathMetadata md) {
-
         // Create single node
         String path = md.toString();
         CyNode n = path2node.get(path);
         createParentForNode(n);
-
     }
 
 
@@ -414,8 +386,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
         String path = node2path.get(n);
         String[] tokens = path.split("/");
         Integer Nparts = tokens.length;
-        System.out.println("path:" + path);
-        System.out.println("tokens length:" + Nparts);
+        logger.debug("path:" + path);
         if (tokens.length>1){
             String [] newTokens = Arrays.copyOfRange(tokens, 0, Nparts-1);
             String parentPath;
@@ -424,11 +395,10 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             } else {
                 parentPath = StringUtils.join(newTokens, "/");
             }
-            System.out.println("parentPath:" + parentPath);
+            logger.debug("parentPath:" + parentPath);
 
             // create parent node and edge
             CyNode nParent;
-            CyEdge e;
             if (!path2node.containsKey(parentPath)){
                 // parent node does not exist (create node and edge)
                 nParent = network.addNode();
@@ -439,7 +409,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             } else {
                 // parent node exists
                 nParent = path2node.get(parentPath);
-                // check if edge exists
+                // check for edge
                 List<CyNode> neighbors = network.getNeighborList(n, CyEdge.Type.DIRECTED);
                 if (! neighbors.contains(nParent)){
                     network.addEdge(nParent, n, true);
