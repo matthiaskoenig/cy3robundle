@@ -1,36 +1,23 @@
 package org.cy3sbml;
 
 import java.io.File;
-import java.io.InputStream;
-import java.net.URI;
-import java.net.URL;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.Properties;
 
+import org.osgi.framework.BundleContext;
 
-import org.apache.xerces.util.XMLChar;
-import org.cy3sbml.actions.ArchiveAction;
 import org.cytoscape.application.CyApplicationConfiguration;
-import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.swing.CyAction;
 import org.cytoscape.application.swing.CySwingApplication;
 import org.cytoscape.io.util.StreamUtil;
 import org.cytoscape.model.CyNetworkFactory;
-import org.cytoscape.model.CyNetworkManager;
-import org.cytoscape.property.CyProperty;
 import org.cytoscape.task.read.LoadNetworkFileTaskFactory;
 import org.cytoscape.util.swing.FileUtil;
-import org.cytoscape.util.swing.OpenBrowser;
 import org.cytoscape.view.layout.CyLayoutAlgorithmManager;
 import org.cytoscape.view.model.CyNetworkViewFactory;
-import org.cytoscape.view.model.CyNetworkViewManager;
 import org.cytoscape.view.vizmap.VisualMappingManager;
 import org.cytoscape.work.SynchronousTaskManager;
-import org.cytoscape.work.TaskManager;
-import org.cytoscape.work.swing.DialogTaskManager;
-import org.osgi.framework.Bundle;
-import org.osgi.framework.BundleContext;
+
+import org.cy3sbml.actions.ArchiveAction;
 
 import org.cytoscape.service.util.AbstractCyActivator;
 import org.slf4j.Logger;
@@ -38,13 +25,13 @@ import org.slf4j.LoggerFactory;
 
 
 /**
- * Entry point to cy3robundle.
- * taverna-language
+ * Read archive files into Cytoscape.
  *
- * TODO: folder tree
+ * Uses the robundle of the taverna-language supporting among others
+ * Zip files, COMBINE archive files, ResearchObjects.
+ *
  * TODO: visual styles & node images based on media type
  * TODO: read secondary files (i.e. SBML & others)
- * TODO: read action from archive icon
  * TODO: information panel (with option to open secondary files in browser & RDF information)
  */
 public class CyActivator extends AbstractCyActivator {
@@ -55,7 +42,7 @@ public class CyActivator extends AbstractCyActivator {
 	}
 	
 	/**
-	 * Starts the cy3sbml OSGI bundle.
+	 * Start OSGI bundle.
 	 */
 	@Override
 	public void start(BundleContext bc) {
@@ -65,20 +52,7 @@ public class CyActivator extends AbstractCyActivator {
             System.out.println("--------------------------------------");
             BundleInformation bundleInfo = new BundleInformation(bc);
 
-            // Loading extension bundles from resources
-            String[] extensionBundles = {
-                "extension/org.apache.xerces.extension-0.0.1.jar"
-            };
-            logger.info("Install extension bundle");
-            Bundle bundle = bc.getBundle();
-            for (String extensionBundle: extensionBundles){
-                URL jarUrl = bundle.getEntry(extensionBundle);
-                InputStream input = jarUrl.openStream();
-                bc.installBundle(jarUrl.getPath(), input);
-                input.close();
-            }
-
-            // Default configuration directory used for all cy3sbml files
+            // Default configuration directory
             CyApplicationConfiguration configuration = getService(bc, CyApplicationConfiguration.class);
             File cyDirectory = configuration.getConfigurationDirectoryLocation();
             File appDirectory = new File(cyDirectory, bundleInfo.getName());

@@ -73,11 +73,10 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 		this.viewFactory = viewFactory;
         this.visualMappingManager = visualMappingManager;
         this.layoutAlgorithmManager = layoutAlgorithmManager;
-
 	}
 
     /**
-     * Get created networks from reader.
+     * Get networks from reader.
      *
      * @return
      */
@@ -88,7 +87,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
     }
 
     /**
-     * Build NetworkViews for given network.
+     * Build NetworkView for given network.
      *
      * @param network
      * @return
@@ -132,7 +131,6 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
         return view;
     }
 
-
     /**
      * Cancel task.
      */
@@ -140,7 +138,25 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
     public void cancel() {}
 
     /**
-     * Parse archive network.
+     * Creates the archive network.
+     *
+     * The heavy lifting is performed by the robundle implementation.
+     *
+     * RO
+     *  read the RO manifest file
+     *  one central file describing the content
+     *  .ro/metadata.json
+     *
+     *  many files describing the individual metadata
+     *      metadata.rdf
+     *      metadata.json
+     *
+     * OMEX
+     *  read OMEX manifest file
+     *  only one central file describing
+     *      manifest.xml (content)
+     *      metadata.rdf (metadata about content)
+     *
      * @param taskMonitor
      * @throws Exception
      */
@@ -157,51 +173,32 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 				return;
 			}
 
+			// mapping of archive content to CyNodes
             id2node = new HashMap<>();
 
-
-            /*
-            The streamUtils transformed the InputStream to a ZipInputInstream
-
-            if (source.toString().toLowerCase().endsWith(GZIP))
-                newIs = new GZIPInputStream(proxyIs);
-            else if (source.toString().toLowerCase().endsWith(ZIP))
-                newIs = new ZipInputStream(proxyIs);
-             */
-
             if (stream instanceof ZipInputStream){
+                logger.info("ZipInputStream found in reader.");
+                /*
+                    This should no happen currently, because the ZipInputStream
+                     is packed into a BufferecInputStream and unreadable as a
+                     consequence.
+                     We have to rename *.zip files to deal with this.
+                 */
                 ZipInputStream zis = (ZipInputStream) stream;
 
-                /// RO ///
-                // read the RO manifest file
-                // one central file describing the content
-                //.ro/metadata.json
-
-                // many files describing the individual metadata
-                // metadata.rdf
-                // metadata.json
-
-
-                /// OMEX ///
-                // read OMEX manifest file
-                // only one central file describing
-                // manifest.xml (content)
-                // metadata.rdf (metadata about content)
-
-                // read all entries from zip file
+                // read entries from zip file
                 ZipEntry ze = null;
                 while ((ze = zis.getNextEntry()) != null) {
                     System.out.println("Unzipping " + ze.getName());
 
                     // write files
-                    /*
-                    FileOutputStream fout = new FileOutputStream(ze.getName());
-                    for (int c = zin.read(); c != -1; c = zin.read()) {
-                        fout.write(c);
-                    }
-                    */
+//                    FileOutputStream fout = new FileOutputStream(ze.getName());
+//                    for (int c = zin.read(); c != -1; c = zin.read()) {
+//                        fout.write(c);
+//                    }
+//
                     zis.closeEntry();
-                    //fout.close();
+                    // fout.close();
                 }
                 zis.close();
             } else {
