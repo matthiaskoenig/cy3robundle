@@ -471,7 +471,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
         String extension;
 
         if (path.equals("/")){
-            extension = "archive";
+            extension = "researchobject";
         } else if (path.endsWith("/")){
             extension = "folder";
             // handle subset of folder aggregates
