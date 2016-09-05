@@ -77,7 +77,7 @@ public class ArchiveAction extends AbstractCyAction {
 
         // open new file open dialog
         Collection<FileChooserFilter> filters = new HashSet<>();
-        String[] extensions = {"", "zip", "omex", "sedx", "ro"};
+        String[] extensions = {"", "zip", "omex", "sedx", "sbex", "cmex", "sbox", "neux", "phex", "ro"};
         filters.add(new FileChooserFilter("Archive files, Research Bundles, COMBINE Archives (*, *.zip, *.omex, *.ro)", extensions));
 
 

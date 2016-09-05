@@ -24,7 +24,7 @@ public class ArchiveFileFilter extends BasicCyFileFilter {
      */
     public ArchiveFileFilter(StreamUtil streamUtil) {
         super(
-                new String[]{"ro", "omex", "sedx", "zip", ""},
+                new String[]{"ro", "omex", "sedx", "sbex", "cmex", "sbox", "neux", "phex", "zip", ""},
                 new String[]{"application/zip", "application/octet-stream", "application/vnd.wf4ever.robundle+zipPK"},
                 "Archive network reader (cy3robundle)",
                 DataCategory.NETWORK,

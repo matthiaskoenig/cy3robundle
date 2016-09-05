@@ -1,11 +1,16 @@
 package org.cy3sbml.gui;
 
 import org.apache.taverna.robundle.Bundle;
+import org.apache.taverna.robundle.manifest.Manifest;
+import org.apache.taverna.robundle.manifest.PathAnnotation;
+import org.apache.taverna.robundle.manifest.PathMetadata;
 import org.cy3sbml.BundleManager;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
 
+import java.io.IOException;
+import java.net.URI;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -64,6 +69,29 @@ public class BundlePanelUpdater implements Runnable {
                 Long suid = suids.get(0);
                 // TODO: get the annotation for the given node
                 panel.setText(String.format("<h1>%s</h1>", suid));
+                try {
+                    Manifest manifest = bundle.getManifest();
+                    PathMetadata metaData;
+
+                    for (PathAnnotation a: manifest.getAnnotations()){
+                        System.out.println(a);
+                        List<URI> uris = a.getAboutList();
+
+                        // TODO: get the annotation file
+                        // Annotation: /metadata.rdf about /README.md
+
+                        // TODO: read information from annotation file
+                        // recommends an XML serialization of the Resource Description Framework [35]
+
+                    }
+
+
+                } catch (IOException e){
+                    e.printStackTrace();
+                }
+
+
+
 
             } else {
                 panel.setText(TEMPLATE_NO_NODE);
