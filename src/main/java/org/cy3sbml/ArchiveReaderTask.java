@@ -378,50 +378,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
     }
 
 
-    /**
-     * TODO: add
-     *
-     * @param n
-     */
-    private void setImageAttribute(CyNode n){
-        final String TEMPLATE = "https://raw.githubusercontent.com/matthiaskoenig/cy3robundle/master/src/main/resources/gui/images/mediatype/%s.png";
 
-        // read attribute
-        String mediaType = AttributeUtil.get(network, n, NODE_ATTR_MEDIATYPE, String.class);
-        String format = AttributeUtil.get(network, n, NODE_ATTR_FORMAT, String.class);
-        String path = AttributeUtil.get(network, n, NODE_ATTR_PATH, String.class);
-
-        // image for node from mediaType
-        String extension;
-        if (mediaType == null) {
-            extension = "blank";
-        } else {
-            if (mediaType.equals("application/octet-stream")){
-                extension = "bin";
-            } else {
-                String tokens[] = mediaType.split("/");
-                extension = tokens[tokens.length-1];
-                // handle +xml
-                if (extension.contains("\\+")){
-                    tokens = extension.split("\\+");
-                    extension = tokens[0];
-                }
-            }
-        }
-        // in case of COMBINE archives we have additional information from format which we can use
-        if (format != null){
-            if (format.contains("sbml")){
-                extension = "sbml";
-            } else if (format.contains("sbgn")){
-                extension = "sbgn";
-            }
-            //TODO: omex, omex-manifest, x-markdown, illustrator, cellml
-        }
-
-
-        String imageLink = String.format(TEMPLATE, extension);
-        AttributeUtil.set(network, n, NODE_IMAGE, imageLink, String.class);
-    }
 
 
     /**
@@ -457,7 +414,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             if (newTokens.length == 1){
                 parentPath = newTokens[0] + "/";
             } else {
-                parentPath = StringUtils.join(newTokens, "/");
+                parentPath = StringUtils.join(newTokens, "/") + "/";
             }
             logger.debug("parentPath:" + parentPath);
 
@@ -483,6 +440,64 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             createParentForNode(nParent);
         }
     }
+
+    /**
+     * Creates the image link for a given node.
+     *
+     * @param n
+     */
+    private void setImageAttribute(CyNode n){
+        final String TEMPLATE = "https://raw.githubusercontent.com/matthiaskoenig/cy3robundle/master/src/main/resources/gui/images/mediatype/%s.png";
+
+        // read attribute
+        String mediaType = AttributeUtil.get(network, n, NODE_ATTR_MEDIATYPE, String.class);
+        String format = AttributeUtil.get(network, n, NODE_ATTR_FORMAT, String.class);
+        String path = AttributeUtil.get(network, n, NODE_ATTR_PATH, String.class);
+
+        // image for node from mediaType
+        String extension;
+
+        if (path.equals("/")){
+            extension = "archive";
+        } else if (path.endsWith("/")){
+            extension = "folder";
+        }
+        else {
+            if (mediaType == null) {
+                extension = "blank";
+            } else {
+                logger.info("mediaType: " + mediaType);
+                if (mediaType.equals("application/octet-stream")){
+                    extension = "bin";
+                } else {
+                    String tokens[] = mediaType.split("/");
+                    extension = tokens[tokens.length-1];
+                    // handle +xml
+                    if (extension.contains("+")){
+                        logger.info("extension contains '+'");
+                        tokens = extension.split("\\+");
+                        extension = tokens[0];
+
+                    }
+                }
+            }
+        }
+
+        // in case of COMBINE archives we have additional information from format which we can use
+        if (format != null){
+            if (format.contains("sbml")){
+                extension = "sbml";
+            } else if (format.contains("sbgn")){
+                extension = "sbgn";
+            }
+            //TODO: omex, omex-manifest, x-markdown, illustrator, cellml
+        }
+
+
+        String imageLink = String.format(TEMPLATE, extension);
+        AttributeUtil.set(network, n, NODE_IMAGE, imageLink, String.class);
+    }
+
 
     /**
      * Agents string representation.
