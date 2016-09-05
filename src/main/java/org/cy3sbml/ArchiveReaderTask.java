@@ -1,12 +1,11 @@
 package org.cy3sbml;
 
 import java.io.InputStream;
+import java.net.URI;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
-import java.util.zip.ZipEntry;
 import java.util.zip.ZipError;
-import java.util.zip.ZipInputStream;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.taverna.robundle.manifest.Agent;
@@ -301,6 +300,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                 System.out.println("\n<annotations>");
                 for (PathAnnotation a: manifest.getAnnotations()){
                     System.out.println(a);
+                    createEdgesForAnnotation(a);
                 }
                 if (taskMonitor != null){
                     taskMonitor.setProgress(0.4);
@@ -396,6 +396,38 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             AttributeUtil.set(network, n, NODE_ATTR_CREATED_ON, time.toString(), String.class);
         }
         return n;
+    }
+
+    /**
+     * Add annotation edges to the network.
+     */
+    private void createEdgesForAnnotation(PathAnnotation a){
+        logger.info("createEdgesForAnnotation :" + a);
+        List<URI> aboutURIs = a.getAboutList();
+        URI contentURI = a.getContent();
+
+        String content = contentURI.toString();
+        CyNode nContent = path2node.get(content);
+        // wrong prefix in content
+        if (nContent == null && content.startsWith("/.ro/")){
+            content = content.replace("/.ro", "");
+            nContent = path2node.get(content);
+        }
+
+        if (nContent != null){
+            for (URI uri: aboutURIs){
+                CyNode nAbout = path2node.get(uri.toString());
+                if (nAbout != null){
+                    // add edge
+                    logger.info("Edge added for annotation.");
+                    network.addEdge(nContent, nAbout, true);
+                } else {
+                    logger.error("About node not found for: " + uri);
+                }
+            }
+        } else {
+            logger.error("Content node not found for: " + contentURI);
+        }
     }
 
 
