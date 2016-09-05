@@ -432,6 +432,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             if (!path2node.containsKey(parentPath)){
                 // parent node does not exist (create node and edge)
                 nParent = network.addNode();
+                AttributeUtil.set(network, nParent, NODE_ATTR_NAME, getNameFromPath(parentPath), String.class);
                 AttributeUtil.set(network, nParent, NODE_ATTR_PATH, parentPath, String.class);
                 AttributeUtil.set(network, nParent, NODE_ATTR_TYPE, TYPE_FOLDER, String.class);
                 AttributeUtil.set(network, nParent, NODE_ATTR_AGGREGATE_TYPE, AGGREGATE_TYPE_FOLDER, String.class);
