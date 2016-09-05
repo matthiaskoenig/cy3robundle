@@ -487,9 +487,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                     extension = "assay";
                 }
             }
-
-        }
-        else {
+        } else {
             if (mediaType == null) {
                 extension = "blank";
             } else {
@@ -497,15 +495,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                 if (mediaType.equals("application/octet-stream")){
                     extension = "bin";
                 } else {
-                    String tokens[] = mediaType.split("/");
-                    extension = tokens[tokens.length-1];
-                    // handle +xml
-                    if (extension.contains("+")){
-                        logger.info("extension contains '+'");
-                        tokens = extension.split("\\+");
-                        extension = tokens[0];
-
-                    }
+                    extension = getExtensionFromMediaType(mediaType);
                 }
             }
         }
@@ -514,17 +504,43 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
         if (format != null){
             if (format.contains("sbml")){
                 extension = "sbml";
+            } else if (format.contains("sed-ml")){
+                extension = "sedml";
             } else if (format.contains("sbgn")){
                 extension = "sbgn";
+            } else if (format.contains("cellml")) {
+                extension = "cellml";
+            } else if (format.endswith("text/plain")){
+                extension = "txt";
+            } else {
+                extension = getExtensionFromMediaType(format);
             }
-            //TODO: omex, omex-manifest, x-markdown, illustrator, cellml
         }
-
 
         String imageLink = String.format(TEMPLATE, extension);
         AttributeUtil.set(network, n, NODE_IMAGE, imageLink, String.class);
     }
 
+    /**
+     * Get the extension from the given mediaType or format String.
+     * Examples:
+     *  http://purl.org/NET/mediatypes/image/svg+xml
+     *  application/rdf+xml
+     *
+     * @param mediaType
+     */
+    private String getExtensionFromMediaType(String mediaType){
+        String tokens[] = mediaType.split("/");
+        String extension = tokens[tokens.length-1];
+        // handle +xml
+        if (extension.contains("+")){
+            logger.info("extension contains '+'");
+            tokens = extension.split("\\+");
+            extension = tokens[0];
+
+        }
+        return extension;
+    }
 
     /**
      * Agents string representation.
