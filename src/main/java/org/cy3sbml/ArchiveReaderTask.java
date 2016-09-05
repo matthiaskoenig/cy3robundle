@@ -478,7 +478,6 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             String[] tokens = path.split("/");
             if (tokens.length > 2) {
                 String type = tokens[tokens.length - 2];
-                logger.info("type: " + type);
                 if (type.equals("studies")){
                     extension = "study";
                 } else if (type.equals("models")){
@@ -491,7 +490,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             if (mediaType == null) {
                 extension = "blank";
             } else {
-                logger.info("mediaType: " + mediaType);
+                logger.debug("mediaType: " + mediaType);
                 if (mediaType.equals("application/octet-stream")){
                     extension = "bin";
                 } else {
@@ -510,7 +509,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                 extension = "sbgn";
             } else if (format.contains("cellml")) {
                 extension = "cellml";
-            } else if (format.endswith("text/plain")){
+            } else if (format.endsWith("text/plain")){
                 extension = "txt";
             } else {
                 extension = getExtensionFromMediaType(format);
