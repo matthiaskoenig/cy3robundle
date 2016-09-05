@@ -47,13 +47,17 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
     public static final String ARCHIVE_LAYOUT = "force-directed";
     public static final String ARCHIVE_STYLE = "robundle";
 
+    public static final String NODE_ATTR_AGGREGATE_TYPE = "aggregate-type";
     public static final String AGGREGATE_TYPE_URI = "uri";
     public static final String AGGREGATE_TYPE_FILE = "file";
+    public static final String AGGREGATE_TYPE_FOLDER = "folder";
+    public static final String AGGREGATE_TYPE_ROOT = "root";
+
     public static final String TYPE_AGGREGATE = "aggregate";
     public static final String TYPE_FOLDER = "folder";
 
 
-    public static final String NODE_ATTR_AGGREGATE_TYPE = "aggregate-type";
+
     public static final String NODE_ATTR_TYPE = "type";
     public static final String NODE_ATTR_NAME = "shared name";
     public static final String NODE_ATTR_PATH = "path";
@@ -339,10 +343,14 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             AttributeUtil.set(network, n, NODE_ATTR_TYPE, TYPE_AGGREGATE, String.class);
         }
         if (md.getFile() != null) {
-            name = md.getUri().toString();
+            name = md.getFile().toString();
             AttributeUtil.set(network, n, NODE_ATTR_NAME, name, String.class);
-            AttributeUtil.set(network, n, NODE_ATTR_AGGREGATE_TYPE, AGGREGATE_TYPE_FILE, String.class);
             AttributeUtil.set(network, n, NODE_ATTR_TYPE, TYPE_AGGREGATE, String.class);
+            String aggregateType = AGGREGATE_TYPE_FILE;
+            if (name.equals('/')) {
+                aggregateType = AGGREGATE_TYPE_ROOT;
+            }
+            AttributeUtil.set(network, n, NODE_ATTR_AGGREGATE_TYPE, aggregateType, String.class);
         }
 
         if (md.getConformsTo() != null){
@@ -424,6 +432,9 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                 // parent node does not exist (create node and edge)
                 nParent = network.addNode();
                 AttributeUtil.set(network, nParent, NODE_ATTR_PATH, parentPath, String.class);
+                AttributeUtil.set(network, nParent, NODE_ATTR_TYPE, TYPE_FOLDER, String.class);
+                AttributeUtil.set(network, nParent, NODE_ATTR_AGGREGATE_TYPE, AGGREGATE_TYPE_FOLDER, String.class);
+
                 node2path.put(nParent, parentPath);
                 path2node.put(parentPath, nParent);
                 network.addEdge(nParent, n, true);

@@ -22,7 +22,7 @@
             <visualProperty name="NODE_LABEL_FONT_FACE" default="SansSerif.plain,plain,12"/>
             <visualProperty name="COMPOUND_NODE_SHAPE" default="ROUND_RECTANGLE"/>
             <visualProperty name="NODE_BORDER_WIDTH" default="7.0"/>
-            <visualProperty name="NODE_SIZE" default="80.0"/>
+            <visualProperty name="NODE_SIZE" default="40.0"/>
             <visualProperty name="NODE_CUSTOMGRAPHICS_POSITION_1" default="C,C,c,0.00,0.00"/>
             <visualProperty name="NODE_CUSTOMGRAPHICS_POSITION_7" default="C,C,c,0.00,0.00"/>
             <visualProperty name="NODE_BORDER_PAINT" default="#FFFFFF"/>
