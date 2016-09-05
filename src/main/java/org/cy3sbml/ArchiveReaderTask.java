@@ -11,6 +11,9 @@ import java.nio.file.attribute.FileTime;
 import java.util.*;
 import java.util.zip.ZipError;
 
+import de.unirostock.sems.cbarchive.Utils;
+import de.unirostock.sems.cbarchive.meta.DefaultMetaDataObject;
+import de.unirostock.sems.cbarchive.meta.OmexMetaDataObject;
 import org.apache.commons.lang.StringUtils;
 import org.apache.taverna.robundle.manifest.Agent;
 import org.cy3sbml.util.AttributeUtil;
@@ -34,6 +37,10 @@ import org.apache.taverna.robundle.Bundles;
 import org.apache.taverna.robundle.manifest.Manifest;
 import org.apache.taverna.robundle.manifest.PathAnnotation;
 import org.apache.taverna.robundle.manifest.PathMetadata;
+
+import org.jdom2.Document;
+import org.jdom2.Element;
+import org.jdom2.JDOMException;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -413,7 +420,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
         String content = contentURI.toString();
         CyNode nContent = path2node.get(content);
         // wrong prefix in content
-        String fixedContent;
+        String fixedContent = content;
         if (nContent == null && content.startsWith("/.ro/")){
             fixedContent = content.replace("/.ro", "");
             nContent = path2node.get(fixedContent);
@@ -428,7 +435,10 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                     network.addEdge(nContent, nAbout, true);
 
                     // TODO: get the file and read the content
-                    Path annotationPath = bundle.getPath(content);
+
+                    //String fixedContent = content.replace("/.ro", "");
+                    Path annotationPath = bundle.getPath(fixedContent);
+
                     Charset charset = Charset.forName("UTF-8");
                     try (BufferedReader reader = Files.newBufferedReader(annotationPath, charset)) {
                         String line = null;
@@ -441,12 +451,38 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                         System.err.format("IOException: %s%n", x);
                     }
 
+                    readOmexMetaData(annotationPath);
+
                 } else {
                     logger.error("About node not found for: " + uri);
                 }
             }
         } else {
             logger.error("Content node not found for: " + contentURI);
+        }
+    }
+
+
+    /** Reads the omex meta data. */
+    private void readOmexMetaData(Path file){
+        Document doc = null;
+        try {
+            doc = Utils.readXmlDocument (file);
+            // Combine archive files
+            List<org.jdom2.Element> nl = Utils.getElementsByTagName(doc.getRootElement (), "Description", Utils.rdfNS);
+            for (int i = 0; i < nl.size (); i++) {
+                Element subtree = nl.get(i);
+                OmexMetaDataObject object = OmexMetaDataObject.tryToRead(subtree);
+                if (object == null) {
+                    // is it default?
+                    DefaultMetaDataObject object2 = DefaultMetaDataObject.tryToRead(subtree);
+                }
+                System.out.println(object);
+            }
+        } catch (JDOMException e) {
+            logger.error("cannot read manifest of archive", e);
+        } catch (IOException e) {
+            logger.error("cannot read manifest of archive.", e);
         }
     }
 
