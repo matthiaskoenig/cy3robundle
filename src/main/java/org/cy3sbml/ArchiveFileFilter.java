@@ -44,7 +44,7 @@ public class ArchiveFileFilter extends BasicCyFileFilter {
     public boolean accepts(URI uri, DataCategory category) {
         try {
             logger.info("public boolean accepts(URI uri, DataCategory category)");
-            System.out.println(uri.toURL());
+            logger.info(uri.toURL().toString());
 
             // Not working because streamUtil extracts the zipped content
             // InputStream inputStream = streamUtil.getInputStream(uri.toURL());
@@ -120,7 +120,7 @@ public class ArchiveFileFilter extends BasicCyFileFilter {
             in.mark(MAGIC.length);
             for (int i = 0; i < MAGIC.length; i++) {
                 byte b = (byte) in.read();
-                System.out.println("byte[" + i + "]: '" + b +"'");
+                logger.debug("byte[" + i + "]: '" + b +"'");
                 if (MAGIC[i] != b) {
                     isZip = false;
                     break;
@@ -130,7 +130,7 @@ public class ArchiveFileFilter extends BasicCyFileFilter {
         } catch (IOException e) {
             isZip = false;
         }
-        logger.info("isZipStream: " + isZip);
+        logger.debug("isZipStream: " + isZip);
         return isZip;
 
     }

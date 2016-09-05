@@ -220,6 +220,13 @@
             <scope>provided</scope>
         </dependency>
 
+        <!-- JavaFX -->
+        <dependency>
+            <groupId>org.codefx.libfx</groupId>
+            <artifactId>LibFX</artifactId>
+            <version>0.3.0</version>
+        </dependency>
+
         <!-- ResearchObjects & OMEX -->
         <dependency>
             <groupId>org.apache.taverna.language</groupId>

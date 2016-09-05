@@ -82,6 +82,8 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 
 	private CyRootNetwork rootNetwork;
 	private CyNetwork network;       // global network of all SBML information
+
+    private Bundle bundle;
     private HashMap<String, CyNode> path2node;
     private HashMap<CyNode, String> node2path;
 
@@ -124,6 +126,22 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
     @Override
     public CyNetworkView buildCyNetworkView(final CyNetwork network) {
         logger.debug("buildCyNetworkView");
+
+        // set bundle in BundleManager
+        BundleManager bundleManager = BundleManager.getInstance();
+
+        // BundleManager is only available in the OSGI context
+        if (bundleManager != null) {
+
+            bundleManager.addBundleForNetwork(bundle, network);
+            // update current network
+            bundleManager.updateCurrent(network);
+            System.out.println(bundleManager.toString());
+        } else {
+            logger.warn("No mapping found for SBML network.");
+        }
+
+
 
         // create view
         CyNetworkView view = viewFactory.createNetworkView(network);
@@ -202,14 +220,14 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             path2node = new HashMap<>();
             node2path = new HashMap<>();
 
+            /*
             if (stream instanceof ZipInputStream){
                 logger.info("ZipInputStream found in reader.");
-                /*
-                    This should no happen currently, because the ZipInputStream
-                     is packed into a BufferecInputStream and unreadable as a
-                     consequence.
-                     We have to rename *.zip files to deal with this.
-                 */
+
+                //    This should no happen currently, because the ZipInputStream
+                //     is packed into a BufferecInputStream and unreadable as a
+                //     consequence.
+                //     We have to rename *.zip files to deal with this.
                 ZipInputStream zis = (ZipInputStream) stream;
 
                 // read entries from zip file
@@ -218,11 +236,11 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                     System.out.println("Unzipping " + ze.getName());
 
                     // write files
-//                    FileOutputStream fout = new FileOutputStream(ze.getName());
-//                    for (int c = zin.read(); c != -1; c = zin.read()) {
-//                        fout.write(c);
-//                    }
-//
+                    FileOutputStream fout = new FileOutputStream(ze.getName());
+                    for (int c = zin.read(); c != -1; c = zin.read()) {
+                        fout.write(c);
+                    }
+
                     zis.closeEntry();
                     // fout.close();
                 }
@@ -231,6 +249,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                 logger.error("Stream is not ZipInputStream");
                 System.out.println(stream);
             }
+            */
 
 
 			// Create empty root network and node map
@@ -250,22 +269,23 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
 
             // Read archive
             try {
-                Bundle bundle = Bundles.openBundle(stream);
+                bundle = Bundles.openBundle(stream);
                 System.out.println(bundle);
 
                 Manifest manifest = bundle.getManifest();
+                System.out.println("------------------------");
                 System.out.println(manifest);
                 System.out.println("CreatedBy: " + manifest.getCreatedBy());
                 System.out.println("CreatedOn: " + manifest.getCreatedOn());
 
-                System.out.println("<manifest>");
+                System.out.println("\n<manifest>");
                 List<Path> pathList = manifest.getManifest();
                 for (Path p: pathList){
                     System.out.println(p);
                 }
 
                 // locations & aggregates (either files or uris)
-                System.out.println("<aggregates>");
+                System.out.println("\n<aggregates>");
                 List<PathMetadata> aggregates = manifest.getAggregates();
                 for (PathMetadata metaData: aggregates){
                     System.out.println(metaData);
@@ -278,14 +298,14 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                     createTreeForPath(metaData);
                 }
 
-                System.out.println("<annotations>");
+                System.out.println("\n<annotations>");
                 for (PathAnnotation a: manifest.getAnnotations()){
                     System.out.println(a);
                 }
                 if (taskMonitor != null){
                     taskMonitor.setProgress(0.4);
                 }
-
+                System.out.println("------------------------");
             }catch(ZipError e){
                 logger.error("Could not read the zip file.");
                 logger.error("Rename archives ending in *.zip with *.zip1");
@@ -533,10 +553,8 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
         String extension = tokens[tokens.length-1];
         // handle +xml
         if (extension.contains("+")){
-            logger.info("extension contains '+'");
             tokens = extension.split("\\+");
             extension = tokens[0];
-
         }
         return extension;
     }

@@ -66,16 +66,18 @@ public class ArchiveAction extends AbstractCyAction {
 
     /**
      * Load archive files.
+     *
+     * TODO: run this through the task manager analoque to the file import
+     *
      * @param e
      */
     @Override
     public void actionPerformed(ActionEvent e) {
         logger.debug("actionPerformed()");
-        System.out.println("read archive file");
 
         // open new file open dialog
         Collection<FileChooserFilter> filters = new HashSet<>();
-        String[] extensions = {"", "zip", "omex", "ro"};
+        String[] extensions = {"", "zip", "omex", "sedx", "ro"};
         filters.add(new FileChooserFilter("Archive files, Research Bundles, COMBINE Archives (*, *.zip, *.omex, *.ro)", extensions));
 
 

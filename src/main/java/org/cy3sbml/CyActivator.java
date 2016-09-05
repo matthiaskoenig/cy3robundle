@@ -3,8 +3,17 @@ package org.cy3sbml;
 import java.io.File;
 import java.util.Properties;
 
+import org.cy3sbml.gui.BundlePanel;
+import org.cytoscape.application.CyApplicationManager;
+import org.cytoscape.application.events.SetCurrentNetworkListener;
+import org.cytoscape.application.swing.CytoPanelComponent;
+import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
+import org.cytoscape.model.events.NetworkAddedListener;
+import org.cytoscape.model.events.RowsSetListener;
 import org.cytoscape.session.events.SessionLoadedListener;
 import org.cytoscape.task.read.LoadVizmapFileTaskFactory;
+import org.cytoscape.view.model.events.NetworkViewAboutToBeDestroyedListener;
+import org.cytoscape.view.model.events.NetworkViewAddedListener;
 import org.osgi.framework.BundleContext;
 
 import org.cytoscape.application.CyApplicationConfiguration;
@@ -31,8 +40,6 @@ import org.slf4j.LoggerFactory;
  *
  * Uses the robundle of the taverna-language supporting among others
  * Zip files, COMBINE archive files, ResearchObjects.
- *
- * TODO: visual styles & node images based on media type
  *
  * TODO: information panel (with option to open secondary files in browser & RDF information)
  * TODO: read secondary files (i.e. SBML & others)
@@ -104,6 +111,22 @@ public class CyActivator extends AbstractCyActivator {
             archiveReaderProps.setProperty("readerId", "archiveNetworkReader");
             registerAllServices(bc, archiveReaderTaskFactory, archiveReaderProps);
 
+            // BundleManager
+            CyApplicationManager cyApplicationManager = getService(bc, CyApplicationManager.class);
+            BundleManager bundleManager = BundleManager.getInstance(cyApplicationManager);
+            registerService(bc, bundleManager, NetworkAboutToBeDestroyedListener.class, new Properties());
+
+            // panels
+
+            BundlePanel bundlePanel = BundlePanel.getInstance(cySwingApplication, cyApplicationManager, appDirectory);
+            registerService(bc, bundlePanel, CytoPanelComponent.class, new Properties());
+            registerService(bc, bundlePanel, RowsSetListener.class, new Properties());
+            registerService(bc, bundlePanel, SetCurrentNetworkListener.class, new Properties());
+            registerService(bc, bundlePanel, NetworkAddedListener.class, new Properties());
+            registerService(bc, bundlePanel, NetworkViewAddedListener.class, new Properties());
+            registerService(bc, bundlePanel, NetworkViewAboutToBeDestroyedListener.class, new Properties());
+
+            bundlePanel.activate();
             System.out.println("--------------------------------------");
 			
 		} catch (Throwable e){
