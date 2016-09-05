@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<vizmap documentVersion="3.0" id="VizMap-2016_09_05-12_32">
+<vizmap documentVersion="3.0" id="VizMap-2016_09_05-12_35">
     <visualStyle name="robundle">
         <network>
             <visualProperty name="NETWORK_EDGE_SELECTION" default="true"/>
@@ -23,7 +23,7 @@
             <visualProperty name="NODE_SELECTED_PAINT" default="#FFFF00"/>
             <visualProperty name="NODE_FILL_COLOR" default="#FEC44F">
                 <discreteMapping attributeType="string" attributeName="aggregate-type">
-                    <discreteMappingEntry value="#6699FF" attributeValue="file"/>
+                    <discreteMappingEntry value="#FFFFFF" attributeValue="file"/>
                     <discreteMappingEntry value="#FF9900" attributeValue="folder"/>
                 </discreteMapping>
             </visualProperty>
@@ -66,7 +66,12 @@
             <visualProperty name="NODE_CUSTOMGRAPHICS_6" default="org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],"/>
             <visualProperty name="NODE_SELECTED" default="false"/>
             <visualProperty name="NODE_CUSTOMGRAPHICS_4" default="org.cytoscape.ding.customgraphics.NullCustomGraphics,0,[ Remove Graphics ],"/>
-            <visualProperty name="NODE_SIZE" default="40.0"/>
+            <visualProperty name="NODE_SIZE" default="60.0">
+                <discreteMapping attributeType="string" attributeName="aggregate-type">
+                    <discreteMappingEntry value="60.0" attributeValue="file"/>
+                    <discreteMappingEntry value="50.0" attributeValue="folder"/>
+                </discreteMapping>
+            </visualProperty>
             <visualProperty name="NODE_DEPTH" default="0.0"/>
             <visualProperty name="NODE_CUSTOMGRAPHICS_POSITION_7" default="C,C,c,0.00,0.00"/>
             <visualProperty name="NODE_Z_LOCATION" default="0.0"/>

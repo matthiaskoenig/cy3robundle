@@ -335,22 +335,20 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
         node2path.put(n, path);
 
         // Set attributes
-        String name;
+        String name = getNameFromPath(path);
+        AttributeUtil.set(network, n, NODE_ATTR_NAME, name, String.class);
         if (md.getUri() != null) {
-            name = md.getUri().toString();
-            AttributeUtil.set(network, n, NODE_ATTR_NAME, name, String.class);
             AttributeUtil.set(network, n, NODE_ATTR_AGGREGATE_TYPE, AGGREGATE_TYPE_URI, String.class);
             AttributeUtil.set(network, n, NODE_ATTR_TYPE, TYPE_AGGREGATE, String.class);
         }
         if (md.getFile() != null) {
-            name = md.getFile().toString();
-            AttributeUtil.set(network, n, NODE_ATTR_NAME, name, String.class);
             AttributeUtil.set(network, n, NODE_ATTR_TYPE, TYPE_AGGREGATE, String.class);
-            String aggregateType = AGGREGATE_TYPE_FILE;
-            if (name.equals('/')) {
-                aggregateType = AGGREGATE_TYPE_ROOT;
-            }
-            AttributeUtil.set(network, n, NODE_ATTR_AGGREGATE_TYPE, aggregateType, String.class);
+            AttributeUtil.set(network, n, NODE_ATTR_AGGREGATE_TYPE, AGGREGATE_TYPE_FILE, String.class);
+        }
+
+        // handle the root node
+        if (name.equals("/")) {
+            AttributeUtil.set(network, n, NODE_ATTR_AGGREGATE_TYPE, AGGREGATE_TYPE_ROOT, String.class);
         }
 
         if (md.getConformsTo() != null){
@@ -377,16 +375,19 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             FileTime time = md.getCreatedOn();
             AttributeUtil.set(network, n, NODE_ATTR_CREATED_ON, time.toString(), String.class);
         }
-
-        // get the extension
-        // if format than from format
-
-        // otherwise use the mediatype
         return n;
     }
 
 
-
+    private String getNameFromPath(String path){
+        // folders and root
+        if (path.endsWith("/")){
+            return path;
+        }
+        // files (file name)
+        String[] tokens = path.split("/");
+        return tokens[tokens.length-1];
+    }
 
 
     /**
