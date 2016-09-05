@@ -1,7 +1,11 @@
 package org.cy3sbml;
 
+import java.io.BufferedReader;
+import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.attribute.FileTime;
 import java.util.*;
@@ -409,9 +413,10 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
         String content = contentURI.toString();
         CyNode nContent = path2node.get(content);
         // wrong prefix in content
+        String fixedContent;
         if (nContent == null && content.startsWith("/.ro/")){
-            content = content.replace("/.ro", "");
-            nContent = path2node.get(content);
+            fixedContent = content.replace("/.ro", "");
+            nContent = path2node.get(fixedContent);
         }
 
         if (nContent != null){
@@ -421,6 +426,21 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                     // add edge
                     logger.info("Edge added for annotation.");
                     network.addEdge(nContent, nAbout, true);
+
+                    // TODO: get the file and read the content
+                    Path annotationPath = bundle.getPath(content);
+                    Charset charset = Charset.forName("UTF-8");
+                    try (BufferedReader reader = Files.newBufferedReader(annotationPath, charset)) {
+                        String line = null;
+                        System.out.println("------------------------------");
+                        while ((line = reader.readLine()) != null) {
+                            System.out.println(line);
+                        }
+                        System.out.println("------------------------------");
+                    } catch (IOException x) {
+                        System.err.format("IOException: %s%n", x);
+                    }
+
                 } else {
                     logger.error("About node not found for: " + uri);
                 }

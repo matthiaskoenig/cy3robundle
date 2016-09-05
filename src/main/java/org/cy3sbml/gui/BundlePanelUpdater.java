@@ -68,6 +68,9 @@ public class BundlePanelUpdater implements Runnable {
                 // use first node
                 Long suid = suids.get(0);
                 // TODO: get the annotation for the given node
+                // This is done via the annotations
+
+
                 panel.setText(String.format("<h1>%s</h1>", suid));
                 try {
                     Manifest manifest = bundle.getManifest();
@@ -80,7 +83,7 @@ public class BundlePanelUpdater implements Runnable {
                         // TODO: get the annotation file
                         // Annotation: /metadata.rdf about /README.md
 
-                        // TODO: read information from annotation file
+                        // TODO: read information from annotation file (RDF or JSON)
                         // recommends an XML serialization of the Resource Description Framework [35]
 
                     }
