@@ -410,7 +410,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
      * @return
      */
     private void createParentForNode(CyNode n) {
-        logger.info("createParentForNode: " + n);
+        logger.debug("createParentForNode: " + n);
 
         // get single node
         String path = node2path.get(n);
@@ -474,6 +474,20 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
             extension = "archive";
         } else if (path.endsWith("/")){
             extension = "folder";
+            // handle subset of folder aggregates
+            String[] tokens = path.split("/");
+            if (tokens.length > 2) {
+                String type = tokens[tokens.length - 2];
+                logger.info("type: " + type);
+                if (type.equals("studies")){
+                    extension = "study";
+                } else if (type.equals("models")){
+                    extension = "model";
+                } else if (type.equals("assays")){
+                    extension = "assay";
+                }
+            }
+
         }
         else {
             if (mediaType == null) {
