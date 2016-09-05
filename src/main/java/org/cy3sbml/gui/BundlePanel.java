@@ -253,7 +253,7 @@ public class BundlePanel extends JFXPanel implements CytoPanelComponent2,
      * Updates panel information within a separate thread.
      */
     public void updateInformation() {
-        logger.debug("updateInformation()");
+        logger.info("updateInformation()");
 
         // Only update if active
         if (!this.isActive()) {
@@ -269,17 +269,17 @@ public class BundlePanel extends JFXPanel implements CytoPanelComponent2,
             return;
         }
 
-        /*
+
         // Update the information in separate thread
         try {
-            PanelUpdater updater = new PanelUpdater(this, network);
+            BundlePanelUpdater updater = new BundlePanelUpdater(this, network);
             Thread t = new Thread(updater);
             t.start();
         } catch (Throwable t) {
             logger.error("Error in handling node selection in CyNetwork", t);
             t.printStackTrace();
         }
-        */
+
     }
 
 }
