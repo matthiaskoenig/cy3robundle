@@ -88,9 +88,9 @@ public class CyActivator extends AbstractCyActivator {
             SynchronousTaskManager synchronousTaskManager = getService(bc, SynchronousTaskManager.class);
             LoadNetworkFileTaskFactory loadNetworkFileTaskFactory = getService(bc, LoadNetworkFileTaskFactory.class);
 
-            ArchiveAction changeStateAction = new ArchiveAction(cySwingApplication, fileUtil,
+            ArchiveAction archiveAction = new ArchiveAction(cySwingApplication, fileUtil,
                                                                 loadNetworkFileTaskFactory, synchronousTaskManager);
-            registerService(bc, changeStateAction, CyAction.class, new Properties());
+            registerService(bc, archiveAction, CyAction.class, new Properties());
 
             // Archive file reader
             CyLayoutAlgorithmManager layoutAlgorithmManager = getService(bc, CyLayoutAlgorithmManager.class);

@@ -49,6 +49,7 @@
             <name>Maven central repository</name>
             <url>http://repo.maven.apache.org/maven2/</url>
         </repository>
+
         <repository>
             <id>sems-maven-repository-releases</id>
             <name>SEMS Maven Repo</name>
@@ -320,7 +321,6 @@
             <version>2.11.0</version>
             <scope>provided</scope>
         </dependency>
-
         <!--
         Update dependencies to fix:
         https://issues.apache.org/jira/browse/JENA-1178
