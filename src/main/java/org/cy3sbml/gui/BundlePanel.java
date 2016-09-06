@@ -7,7 +7,10 @@ import javafx.scene.Scene;
 import javax.swing.*;
 import java.awt.*;
 import java.io.File;
+import java.util.*;
 
+import org.apache.taverna.robundle.Bundle;
+import org.cy3sbml.BundleAnnotation;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.application.events.SetCurrentNetworkEvent;
 import org.cytoscape.application.events.SetCurrentNetworkListener;
@@ -230,8 +233,11 @@ public class BundlePanel extends JFXPanel implements CytoPanelComponent2,
      */
     @Override
     public void handleEvent(SetCurrentNetworkEvent event) {
+        logger.info("SetCurrentNetworkEvent");
         CyNetwork network = event.getNetwork();
-        BundleManager.getInstance().updateCurrent(network);
+        BundleManager bundleManager = BundleManager.getInstance();
+        bundleManager.updateCurrent(network);
+
         updateInformation();
     }
 
@@ -247,7 +253,6 @@ public class BundlePanel extends JFXPanel implements CytoPanelComponent2,
     @Override
     public void handleEvent(NetworkViewAboutToBeDestroyedEvent event) {
     }
-
 
     /**
      * Updates panel information within a separate thread.

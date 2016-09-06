@@ -1,23 +1,29 @@
 package org.cy3sbml.gui;
 
+import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.commons.lang.StringUtils;
 import org.apache.taverna.robundle.Bundle;
 import org.apache.taverna.robundle.manifest.Manifest;
 import org.apache.taverna.robundle.manifest.PathAnnotation;
 import org.apache.taverna.robundle.manifest.PathMetadata;
+import org.cy3sbml.ArchiveReaderTask;
+import org.cy3sbml.BundleAnnotation;
 import org.cy3sbml.BundleManager;
+import org.cy3sbml.util.AttributeUtil;
 import org.cytoscape.model.CyNetwork;
 import org.cytoscape.model.CyNode;
 import org.cytoscape.model.CyTableUtil;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Updates the Panel information based on selection.
  */
 public class BundlePanelUpdater implements Runnable {
+    private static final Logger logger = LoggerFactory.getLogger(BundlePanelUpdater.class);
 
     private static final String TEMPLATE_NO_NODE =
             "<h2>No information</h2>" +
@@ -53,56 +59,40 @@ public class BundlePanelUpdater implements Runnable {
     public void run() {
         BundleManager bundleManager = BundleManager.getInstance();
 
-        // selected node SUIDs
-        LinkedList<Long> suids = new LinkedList<>();
+        // selected nodes
         List<CyNode> nodes = CyTableUtil.getNodesInState(network, CyNetwork.SELECTED, true);
-        for (CyNode n : nodes){
-            suids.add(n.getSUID());
-        }
 
         // information for selected node(s)
         Bundle bundle = bundleManager.getCurrentBundle();
-        if (bundle != null){
+        if (bundle == null){
+            System.out.println("No bundle for current network");
+            panel.setText(TEMPLATE_NO_BUNDLE);
+        } else {
+            BundleAnnotation bundleAnnotation = bundleManager.getCurrentBundleAnnotation();
+            Map<String, List<String>> pathAnnotations = bundleAnnotation.getPathAnnotations();
 
-            if (suids.size() > 0){
-                // use first node
-                Long suid = suids.get(0);
-                // TODO: get the annotation for the given node
-                // This is done via the annotations
+            // Get annotation for node (default to root)
+            String path = "/";
+            // TODO: get root path
 
-
-                panel.setText(String.format("<h1>%s</h1>", suid));
-                try {
-                    Manifest manifest = bundle.getManifest();
-                    PathMetadata metaData;
-
-                    for (PathAnnotation a: manifest.getAnnotations()){
-                        System.out.println(a);
-                        List<URI> uris = a.getAboutList();
-
-                        // TODO: get the annotation file
-                        // Annotation: /metadata.rdf about /README.md
-
-                        // TODO: read information from annotation file (RDF or JSON)
-                        // recommends an XML serialization of the Resource Description Framework [35]
-
-                    }
-
-
-                } catch (IOException e){
-                    e.printStackTrace();
-                }
-
-
-
-
-            } else {
-                panel.setText(TEMPLATE_NO_NODE);
+            if (nodes != null && nodes.size() > 0) {
+                CyNode n = nodes.get(0);
+                path = AttributeUtil.get(network, n, ArchiveReaderTask.NODE_ATTR_PATH, String.class);
             }
 
-        } else {
-            panel.setText(TEMPLATE_NO_BUNDLE);
+            // create html
+            // TODO: proper formating
+            String text = String.format("<h1>%s</h1>\n", path);
+            // TODO: link to file
+            if (pathAnnotations != null && pathAnnotations.containsKey(path)){
+                for (String s : pathAnnotations.get(path)) {
+                    text += String.format("<p><span class=\"code\">%s</span></p>",
+                            StringEscapeUtils.escapeHtml(s));
+                }
+            }
+            panel.setText(text);
         }
+
     }
 
 }

@@ -1,11 +1,22 @@
 package org.cy3sbml;
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.net.URI;
+import java.nio.charset.Charset;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.taverna.robundle.Bundle;
 
+import org.apache.taverna.robundle.manifest.Manifest;
+import org.apache.taverna.robundle.manifest.PathAnnotation;
 import org.cytoscape.application.CyApplicationManager;
 import org.cytoscape.model.CyNetwork;
+import org.cytoscape.model.CyNode;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedEvent;
 import org.cytoscape.model.events.NetworkAboutToBeDestroyedListener;
 import org.cytoscape.model.subnetwork.CyRootNetwork;
@@ -28,6 +39,7 @@ public class BundleManager implements NetworkAboutToBeDestroyedListener {
 
     private Long currentSUID;
     private Network2BundleMapper network2bundle;
+    private HashMap<Bundle, BundleAnnotation> bundle2annotation;
 
     /**
      * Get instance.
@@ -64,6 +76,7 @@ public class BundleManager implements NetworkAboutToBeDestroyedListener {
     private void reset() {
         currentSUID = null;
         network2bundle = new Network2BundleMapper();
+        bundle2annotation = new HashMap<>();
     }
 
     /**
@@ -85,6 +98,8 @@ public class BundleManager implements NetworkAboutToBeDestroyedListener {
      */
     public void addBundleForNetwork(Bundle bundle, Long rootNetworkSUID) {
         network2bundle.put(rootNetworkSUID, bundle);
+        BundleAnnotation annotation = new BundleAnnotation(bundle);
+        bundle2annotation.put(bundle, annotation);
     }
 
     /**
@@ -151,6 +166,15 @@ public class BundleManager implements NetworkAboutToBeDestroyedListener {
     public Bundle getCurrentBundle() {
         return getBundle(currentSUID);
     }
+
+    public BundleAnnotation getCurrentBundleAnnotation() {
+        Bundle bundle = getBundle(currentSUID);
+        if (bundle == null){
+            return null;
+        }
+        return bundle2annotation.get(bundle);
+    }
+
 
     /**
      * Get bundle for given network.

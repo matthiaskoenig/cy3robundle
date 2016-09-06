@@ -311,7 +311,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                 System.out.println("\n<annotations>");
                 for (PathAnnotation a: manifest.getAnnotations()){
                     System.out.println(a);
-                    createEdgesForAnnotation(a);
+                    // createEdgesForAnnotation(a);
                 }
                 if (taskMonitor != null){
                     taskMonitor.setProgress(0.4);
@@ -412,6 +412,7 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
     /**
      * Add annotation edges to the network.
      */
+    @Deprecated
     private void createEdgesForAnnotation(PathAnnotation a){
         logger.info("createEdgesForAnnotation :" + a);
         List<URI> aboutURIs = a.getAboutList();
@@ -433,56 +434,12 @@ public class ArchiveReaderTask extends AbstractTask implements CyNetworkReader {
                     // add edge
                     logger.info("Edge added for annotation.");
                     network.addEdge(nContent, nAbout, true);
-
-                    // TODO: get the file and read the content
-
-                    //String fixedContent = content.replace("/.ro", "");
-                    Path annotationPath = bundle.getPath(fixedContent);
-
-                    Charset charset = Charset.forName("UTF-8");
-                    try (BufferedReader reader = Files.newBufferedReader(annotationPath, charset)) {
-                        String line = null;
-                        System.out.println("------------------------------");
-                        while ((line = reader.readLine()) != null) {
-                            System.out.println(line);
-                        }
-                        System.out.println("------------------------------");
-                    } catch (IOException x) {
-                        System.err.format("IOException: %s%n", x);
-                    }
-
-                    readOmexMetaData(annotationPath);
-
                 } else {
                     logger.error("About node not found for: " + uri);
                 }
             }
         } else {
             logger.error("Content node not found for: " + contentURI);
-        }
-    }
-
-
-    /** Reads the omex meta data. */
-    private void readOmexMetaData(Path file){
-        Document doc = null;
-        try {
-            doc = Utils.readXmlDocument (file);
-            // Combine archive files
-            List<org.jdom2.Element> nl = Utils.getElementsByTagName(doc.getRootElement (), "Description", Utils.rdfNS);
-            for (int i = 0; i < nl.size (); i++) {
-                Element subtree = nl.get(i);
-                OmexMetaDataObject object = OmexMetaDataObject.tryToRead(subtree);
-                if (object == null) {
-                    // is it default?
-                    DefaultMetaDataObject object2 = DefaultMetaDataObject.tryToRead(subtree);
-                }
-                System.out.println(object);
-            }
-        } catch (JDOMException e) {
-            logger.error("cannot read manifest of archive", e);
-        } catch (IOException e) {
-            logger.error("cannot read manifest of archive.", e);
         }
     }
 
